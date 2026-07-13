@@ -30,7 +30,15 @@ services:
       DATABASE_URL: postgresql://lcd_user:lcd_password@postgres:5432/lcd_ai_os
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       SECRET_KEY: ${BACKEND_SECRET_KEY:-lcd-secret-key}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?ENCRYPTION_KEY is required — generate with openssl rand -base64 32}
+      JWT_SECRET: ${JWT_SECRET:-}
+      ENFORCE_HTTPS: ${ENFORCE_HTTPS:-false}
       FRONTEND_URL: http://localhost:3000
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
     ports:
       - "8000:8000"
     depends_on:
@@ -54,7 +62,8 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
 volumes:
   postgres_data:

@@ -33,3 +33,21 @@ export const DRC_CITIES_COUNT = 33;
 
 export const LANGUAGES = ['fr', 'ln', 'kg', 'ts', 'sw'] as const;
 export type Language = typeof LANGUAGES[number];
+
+// ── Encryption spec (must match frontend/src/lib/crypto.ts + backend/security.py) ──
+export const ENCRYPTION = {
+  ENVELOPE_PREFIX: 'lcd-e2ee-v1',
+  ALGORITHM: 'AES-256-GCM',
+  KDF: 'PBKDF2-SHA256',
+  KDF_ITERATIONS: 310_000,
+  SALT_BYTES: 16,
+  IV_BYTES: 12,
+} as const;
+
+export const SENSITIVE_MEMBER_FIELDS = [
+  'nationalId',
+  'phone',
+  'email',
+  'address',
+  'dateOfBirth',
+] as const;
