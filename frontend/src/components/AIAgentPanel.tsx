@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Send, Bot, User, Loader2, Sparkles } from 'lucide-react';
 
 interface Message {
@@ -30,6 +30,9 @@ export default function AIAgentPanel({
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
@@ -115,7 +118,7 @@ export default function AIAgentPanel({
             }`}>
               <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
               <p className={`text-xs mt-1 ${msg.role === 'user' ? 'text-blue-200' : 'text-gray-400'}`}>
-                {msg.timestamp.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                {mounted ? msg.timestamp.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : ''}
               </p>
             </div>
           </div>

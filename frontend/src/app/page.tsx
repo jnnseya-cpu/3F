@@ -97,7 +97,7 @@ export default function LandingPage() {
 
             {/* Party Name */}
             <h1 className="text-5xl md:text-7xl font-black mb-4 leading-tight">
-              <span className="text-white">Congo</span>{' '}
+              <span className="text-white">Le Congo</span>{' '}
               <span className="text-drc-yellow">D'Abord</span>
             </h1>
 
