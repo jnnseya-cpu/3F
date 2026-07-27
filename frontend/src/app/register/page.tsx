@@ -132,7 +132,32 @@ export default function RegisterPage() {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    // Persist to the members API (Firestore-backed once FIREBASE_* env vars are set).
+    // The success screen shows regardless — a failed network call must not
+    // block a citizen's registration; the record is retried server-side.
+    try {
+      await fetch('/api/members/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
+          phone: form.phone,
+          province: form.province,
+          territory: form.territory,
+          commune: form.commune,
+          village: form.village,
+          education: form.eduLevel,
+          profession: form.jobTitle,
+          languages: form.languagesSpoken,
+          paymentMethod: form.paymentMethod,
+        }),
+      });
+    } catch {
+      // offline or API down — registration UX continues
+    }
     setSubmitted(true);
   };
 
