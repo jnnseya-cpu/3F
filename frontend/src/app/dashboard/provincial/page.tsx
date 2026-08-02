@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import DemoDataBanner from '@/components/DemoDataBanner';
 import Link from 'next/link';
 import { Users, MapPin, TrendingUp, Shield, BookOpen, Star, Brain, AlertTriangle } from 'lucide-react';
 import AIAgentPanel from '@/components/AIAgentPanel';
@@ -16,6 +17,7 @@ export default function ProvincialDashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <DemoDataBanner />
       <div className="bg-drc-blue text-white">
         <div className="flag-stripe" />
         <div className="max-w-7xl mx-auto px-4 py-6">

@@ -137,10 +137,10 @@ export default function LandingPage() {
         <div className="bg-black/20 backdrop-blur-sm border-t border-white/10">
           <div className="max-w-7xl mx-auto px-4 py-4 grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: 'Membres inscrits', value: totalMembers.toLocaleString() },
-              { label: 'Cotisants actifs', value: totalContributors.toLocaleString() },
-              { label: 'Provinces actives', value: '26/26' },
-              { label: 'Agents IA actifs', value: '12' },
+              { label: 'Provinces couvertes', value: '26/26' },
+              { label: 'Langues nationales', value: '5' },
+              { label: 'Agents IA actifs', value: '23' },
+              { label: 'Niveaux de structure', value: '7' },
             ].map(stat => (
               <div key={stat.label} className="text-center">
                 <p className="text-2xl font-black text-drc-yellow">{stat.value}</p>
@@ -226,7 +226,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             {[
               { n: '11', label: 'Agents SNTO' },
-              { n: '156', label: 'Projets nationaux' },
+              { n: '9', label: 'Secteurs stratégiques' },
               { n: '26', label: 'Provinces couvertes' },
               { n: '10 ans', label: 'Feuille de route' },
             ].map(s => (

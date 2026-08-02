@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { rateLimit, clientIp } from '@/lib/rateLimit';
 
 /**
  * AI Agent chat — multi-provider router with automatic fallback.
@@ -89,6 +90,12 @@ async function tryGemini(system: string, message: string): Promise<string | null
 
 export async function POST(req: NextRequest) {
   try {
+    if (!rateLimit(`chat:${clientIp(req.headers)}`, 10, 60_000)) {
+      return NextResponse.json(
+        { error: 'Trop de requêtes — réessayez dans une minute' },
+        { status: 429 },
+      );
+    }
     const { agentName, message } = await req.json();
     if (!message || typeof message !== 'string' || message.length > 4000) {
       return NextResponse.json({ error: 'Invalid message' }, { status: 400 });

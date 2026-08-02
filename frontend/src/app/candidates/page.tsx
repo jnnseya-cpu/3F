@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import DemoDataBanner from '@/components/DemoDataBanner';
 import { Brain, Filter, AlertCircle, CheckCircle, Users } from 'lucide-react';
 import CandidateCard from '@/components/CandidateCard';
 import { calculateCandidateScore } from '@/lib/scoring';
@@ -72,6 +73,7 @@ export default function CandidatesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <DemoDataBanner />
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="flag-stripe" />

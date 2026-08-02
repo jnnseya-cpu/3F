@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import DemoDataBanner from '@/components/DemoDataBanner';
 import Link from 'next/link';
 import {
   FolderKanban, Cpu, PenLine, DollarSign, Users, BarChart3,
@@ -157,6 +158,7 @@ export default function ProjectsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <DemoDataBanner />
       {/* Hero */}
       <div className="bg-drc-blue text-white py-12 px-4">
         <div className="max-w-7xl mx-auto">

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import DemoDataBanner from '@/components/DemoDataBanner';
 import {
   ChevronRight, CheckCircle2, Clock3, AlertTriangle, DollarSign,
   Users, MapPin, TrendingUp, Star, Zap, LayoutDashboard,
@@ -37,6 +38,7 @@ export default function CommandCentrePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <DemoDataBanner />
       {/* Header */}
       <div className="bg-drc-blue text-white py-10 px-4">
         <div className="max-w-7xl mx-auto">

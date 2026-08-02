@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { rateLimit, clientIp } from '@/lib/rateLimit';
 
 /**
  * Contribution checkout — BitriPay integration.
@@ -25,6 +26,9 @@ const PLANS: Record<string, { amount: number; label: string; months: number }> =
 
 export async function POST(req: NextRequest) {
   try {
+    if (!rateLimit(`checkout:${clientIp(req.headers)}`, 5, 60_000)) {
+      return NextResponse.json({ error: 'Trop de requêtes' }, { status: 429 });
+    }
     const { plan = 'annual', memberId, phone } = await req.json();
 
     const selected = PLANS[plan];

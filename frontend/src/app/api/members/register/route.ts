@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { rateLimit, clientIp } from '@/lib/rateLimit';
 
 /**
  * Member registration — persists to Firebase Firestore via REST API.
@@ -43,6 +44,9 @@ function toFirestoreFields(obj: Record<string, unknown>) {
 
 export async function POST(req: NextRequest) {
   try {
+    if (!rateLimit(`register:${clientIp(req.headers)}`, 5, 60_000)) {
+      return NextResponse.json({ error: 'Trop de requêtes' }, { status: 429 });
+    }
     const body = (await req.json()) as RegistrationBody;
 
     if (!body.firstName?.trim() || !body.lastName?.trim()) {

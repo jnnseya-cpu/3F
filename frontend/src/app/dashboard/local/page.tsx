@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import DemoDataBanner from '@/components/DemoDataBanner';
 import Link from 'next/link';
 import { Users, MapPin, CheckCircle, BookOpen, DollarSign, Brain, Plus, AlertCircle } from 'lucide-react';
 import AIAgentPanel from '@/components/AIAgentPanel';
@@ -24,6 +25,7 @@ export default function LocalDashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <DemoDataBanner />
       <div className="bg-drc-blue text-white">
         <div className="flag-stripe" />
         <div className="max-w-7xl mx-auto px-4 py-6">

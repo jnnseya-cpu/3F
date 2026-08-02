@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import DemoDataBanner from '@/components/DemoDataBanner';
 import Link from 'next/link';
 import {
   Shield, TrendingUp, Users, AlertTriangle, MapPin, Brain, DollarSign,
@@ -104,6 +105,7 @@ export default function FounderDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <DemoDataBanner />
       {/* Header */}
       <div className="bg-drc-blue text-white">
         <div className="flag-stripe" />
