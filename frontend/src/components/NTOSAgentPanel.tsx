@@ -4,6 +4,11 @@ import { useState, useEffect } from 'react';
 import { Send, Bot, User, Loader2, Sparkles, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
+
+function getMemberId(): string | null {
+  try { return localStorage.getItem('lcd_member_id'); } catch { return null; }
+}
+
 interface Message {
   role: 'user' | 'assistant';
   content: string;
@@ -58,12 +63,20 @@ export default function NTOSAgentPanel({
       const res = await fetch('/api/agents/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ agentName: `SNTO-${agentId}`, message: content }),
+        body: JSON.stringify({ agentName: `SNTO-${agentId}`, message: content, memberId: getMemberId() }),
       });
 
       if (res.ok) {
         const data = await res.json();
-        setMessages(prev => [...prev, { role: 'assistant', content: data.response, timestamp: new Date() }]);
+        const suffix = typeof data.acuRemaining === 'number' ? `\n\n— ${data.acuRemaining} ACUs restants` : '';
+        setMessages(prev => [...prev, { role: 'assistant', content: data.response + suffix, timestamp: new Date() }]);
+      } else if (res.status === 402) {
+        const data = await res.json().catch(() => ({}));
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: `\u26a1 ${data.message || 'Action IA non disponible.'}\n\nChaque action IA consomme des ACUs (unités de calcul IA). Les ACUs s'obtiennent uniquement via la cotisation : 1 USD/mois = 5 ACUs, 12 USD/an = 80 ACUs.\n\nVoici un exemple de démonstration (sans IA) :\n\n${demoResponse(content)}`,
+          timestamp: new Date(),
+        }]);
       } else {
         setMessages(prev => [...prev, { role: 'assistant', content: demoResponse(content), timestamp: new Date() }]);
       }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
+import { debit, ACU_COSTS } from '@/lib/acu';
 
 /**
  * AI Agent chat — multi-provider router with automatic fallback.
@@ -96,9 +97,25 @@ export async function POST(req: NextRequest) {
         { status: 429 },
       );
     }
-    const { agentName, message } = await req.json();
+    const { agentName, message, memberId } = await req.json();
     if (!message || typeof message !== 'string' || message.length > 4000) {
       return NextResponse.json({ error: 'Invalid message' }, { status: 400 });
+    }
+
+    // ACU gate — every AI action is metered, no free actions
+    if (!memberId || typeof memberId !== 'string') {
+      return NextResponse.json(
+        { error: 'ACU_REQUIRED', message: 'Compte membre requis — les actions IA consomment des ACUs.' },
+        { status: 402 },
+      );
+    }
+    const charge = await debit(memberId, ACU_COSTS.chat);
+    if (!charge.ok) {
+      return NextResponse.json(
+        { error: 'ACU_INSUFFICIENT', balance: charge.balance, cost: ACU_COSTS.chat,
+          message: 'Solde ACU insuffisant — cotisez pour recharger vos ACUs.' },
+        { status: 402 },
+      );
     }
 
     const system = SYSTEM_PROMPT(agentName || 'Agent CDP');
@@ -112,7 +129,7 @@ export async function POST(req: NextRequest) {
     for (const [name, fn] of providers) {
       try {
         const text = await fn(system, message);
-        if (text) return NextResponse.json({ response: text, provider: name });
+        if (text) return NextResponse.json({ response: text, provider: name, acuRemaining: charge.remaining });
         // null = provider not configured, skip silently
       } catch (e) {
         errors.push(`${name}: ${e instanceof Error ? e.message : 'error'}`);

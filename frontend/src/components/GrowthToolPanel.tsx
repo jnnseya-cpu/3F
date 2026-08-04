@@ -4,6 +4,11 @@ import { useState } from 'react';
 import { Loader2, Sparkles, Copy, Check, RotateCcw } from 'lucide-react';
 import { getGrowthTool } from '@/lib/growthTools';
 
+
+function getMemberId(): string | null {
+  try { return localStorage.getItem('lcd_member_id'); } catch { return null; }
+}
+
 export default function GrowthToolPanel({ toolId }: { toolId: string }) {
   const tool = getGrowthTool(toolId);
   const [inputs, setInputs] = useState<Record<string, string>>(() => {
@@ -28,11 +33,16 @@ export default function GrowthToolPanel({ toolId }: { toolId: string }) {
       const res = await fetch('/api/growth/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ toolId, inputs }),
+        body: JSON.stringify({ toolId, inputs, memberId: getMemberId() }),
       });
       if (res.ok) {
         const data = await res.json();
-        setOutput(data.output);
+        const suffix = typeof data.acuRemaining === 'number' ? `\n\n— ${data.acuRemaining} ACUs restants` : '';
+        setOutput(data.output + suffix);
+      } else if (res.status === 402) {
+        const d = await res.json().catch(() => ({}));
+        setOutput(`\u26a1 ${d.message || 'Action IA non disponible.'}\n\nChaque génération consomme 2 ACUs. Les ACUs s'obtiennent via la cotisation : 1 USD/mois = 5 ACUs, 12 USD/an = 80 ACUs.\n\n──────────\nEXEMPLE DE DÉMONSTRATION (sans IA) :\n\n${tool.demo(inputs)}`);
+        setIsDemo(true);
       } else {
         setOutput(tool.demo(inputs));
         setIsDemo(true);

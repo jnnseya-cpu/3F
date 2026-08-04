@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { credit, ACU_GRANTS } from '@/lib/acu';
 
 /**
  * BitriPay payment webhook — activates the member on successful payment.
@@ -78,7 +79,17 @@ export async function POST(req: NextRequest) {
       console.warn('Payment received but Firebase not configured — memberId:', memberId);
     }
 
-    return NextResponse.json({ received: true, memberActivated: memberId });
+    // Credit ACUs for the paid plan — the only way to earn AI actions
+    let acuCredited = 0;
+    try {
+      const plan = metadata.plan || (months >= 12 ? 'annual' : months >= 3 ? 'quarterly' : 'monthly');
+      acuCredited = ACU_GRANTS[plan] ?? ACU_GRANTS.monthly;
+      await credit(memberId, acuCredited);
+    } catch (e) {
+      console.error('ACU credit failed (payment still recorded):', e);
+    }
+
+    return NextResponse.json({ received: true, memberActivated: memberId, acuCredited });
   } catch (error) {
     console.error('Webhook error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

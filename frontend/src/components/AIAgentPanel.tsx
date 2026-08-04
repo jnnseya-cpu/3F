@@ -3,6 +3,11 @@
 import { useState, useEffect } from 'react';
 import { Send, Bot, User, Loader2, Sparkles } from 'lucide-react';
 
+
+function getMemberId(): string | null {
+  try { return localStorage.getItem('lcd_member_id'); } catch { return null; }
+}
+
 interface Message {
   role: 'user' | 'assistant';
   content: string;
@@ -46,14 +51,22 @@ export default function AIAgentPanel({
       const res = await fetch('/api/agents/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ agentName, message: input }),
+        body: JSON.stringify({ agentName, message: input, memberId: getMemberId() }),
       });
 
       if (res.ok) {
         const data = await res.json();
+        const suffix = typeof data.acuRemaining === 'number' ? `\n\n— ${data.acuRemaining} ACUs restants` : '';
         setMessages(prev => [...prev, {
           role: 'assistant',
-          content: data.response,
+          content: data.response + suffix,
+          timestamp: new Date(),
+        }]);
+      } else if (res.status === 402) {
+        const d = await res.json().catch(() => ({}));
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: `\u26a1 ${d.message || 'Action IA non disponible.'}\n\nChaque action IA consomme des ACUs. Cotisez pour recharger (1 USD/mois = 5 ACUs, 12 USD/an = 80 ACUs).\n\nExemple de démonstration (sans IA) :\n\n${getDemoResponse(agentName, input)}`,
           timestamp: new Date(),
         }]);
       } else {

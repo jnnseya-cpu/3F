@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { debit, ACU_COSTS } from '@/lib/acu';
 
 /**
  * SEO Autopilot — runs on a daily Vercel cron (see vercel.json "crons").
@@ -128,6 +129,16 @@ export async function GET(req: NextRequest) {
   // Rotate topic by day of year so each run gets a different subject
   const dayOfYear = Math.floor((Date.now() - Date.UTC(new Date().getUTCFullYear(), 0, 0)) / 86_400_000);
   const topic = TOPICS[dayOfYear % TOPICS.length];
+
+  // ACU gate — the autopilot spends from the party's system account
+  const charge = await debit('system-autopilot', ACU_COSTS.autopilot);
+  if (!charge.ok) {
+    return NextResponse.json(
+      { status: 'skipped', reason: 'ACU_INSUFFICIENT', balance: charge.balance,
+        message: 'Compte ACU system-autopilot épuisé — rechargez-le dans Firestore acu_accounts/system-autopilot.' },
+      { status: 402 },
+    );
+  }
 
   const article = await generateArticle(topic);
   if (!article) {

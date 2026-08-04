@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
+import { debit, ACU_COSTS } from '@/lib/acu';
 
 /**
  * AI Growth Engine — generation endpoint.
@@ -79,10 +80,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Trop de requêtes — réessayez dans une minute' }, { status: 429 });
     }
 
-    const { toolId, inputs } = await req.json();
+    const { toolId, inputs, memberId } = await req.json();
     const promptBuilder = TOOL_PROMPTS[toolId];
     if (!promptBuilder || typeof inputs !== 'object') {
       return NextResponse.json({ error: 'toolId invalide' }, { status: 400 });
+    }
+
+    // ACU gate — every AI action is metered, no free actions
+    if (!memberId || typeof memberId !== 'string') {
+      return NextResponse.json(
+        { error: 'ACU_REQUIRED', message: 'Compte membre requis — les outils IA consomment des ACUs.' },
+        { status: 402 },
+      );
+    }
+    const charge = await debit(memberId, ACU_COSTS.growth);
+    if (!charge.ok) {
+      return NextResponse.json(
+        { error: 'ACU_INSUFFICIENT', balance: charge.balance, cost: ACU_COSTS.growth,
+          message: 'Solde ACU insuffisant — cotisez pour recharger vos ACUs.' },
+        { status: 402 },
+      );
     }
 
     // sanitize input values
@@ -95,7 +112,7 @@ export async function POST(req: NextRequest) {
     if (!result) {
       return NextResponse.json({ error: 'AI indisponible' }, { status: 503 });
     }
-    return NextResponse.json({ output: result.text, provider: result.provider });
+    return NextResponse.json({ output: result.text, provider: result.provider, acuRemaining: charge.remaining });
   } catch (error) {
     console.error('Growth generate error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
