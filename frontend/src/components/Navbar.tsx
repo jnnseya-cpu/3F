@@ -28,6 +28,7 @@ export default function Navbar({ language, setLanguage }: NavbarProps) {
     { href: '/ethics', label: tr['nav.ethics'] || 'Éthique' },
     { href: '/projects', label: 'SNTO Projets' },
     { href: '/blog', label: 'Blog' },
+    { href: '/growth', label: 'Growth IA' },
   ];
 
   return (
