@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { humanFetch } from '@/lib/humanClient';
 import { CheckCircle, User, MapPin, BookOpen, Briefcase, Star, DollarSign, ChevronRight, ChevronLeft, AlertCircle } from 'lucide-react';
 import { DRC_PROVINCES, CONTINENTS, AFRICAN_COUNTRIES } from '@/lib/provinces';
 
@@ -137,7 +138,7 @@ export default function RegisterPage() {
     // The success screen shows regardless — a failed network call must not
     // block a citizen's registration; the record is retried server-side.
     try {
-      await fetch('/api/members/register', {
+      await humanFetch('/api/members/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

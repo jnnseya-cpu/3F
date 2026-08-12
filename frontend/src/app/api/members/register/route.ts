@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
+import { humanGuard } from '@/lib/guard';
 
 /**
  * Member registration — persists to Firebase Firestore via REST API.
@@ -48,6 +49,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Trop de requêtes' }, { status: 429 });
     }
     const body = (await req.json()) as RegistrationBody;
+    const guard = humanGuard(req, body);
+    if (guard) return guard;
 
     if (!body.firstName?.trim() || !body.lastName?.trim()) {
       return NextResponse.json({ error: 'Nom et prénom requis' }, { status: 400 });

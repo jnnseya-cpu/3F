@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
+import { humanGuard } from '@/lib/guard';
 import { debit, ACU_COSTS } from '@/lib/acu';
 
 /**
@@ -80,7 +81,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Trop de requêtes — réessayez dans une minute' }, { status: 429 });
     }
 
-    const { toolId, inputs, memberId } = await req.json();
+    const body = await req.json();
+    const guard = humanGuard(req, body);
+    if (guard) return guard;
+    const { toolId, inputs, memberId } = body;
     const promptBuilder = TOOL_PROMPTS[toolId];
     if (!promptBuilder || typeof inputs !== 'object') {
       return NextResponse.json({ error: 'toolId invalide' }, { status: 400 });

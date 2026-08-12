@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
+import { humanGuard } from '@/lib/guard';
 import { debit, ACU_COSTS } from '@/lib/acu';
 
 /**
@@ -97,7 +98,10 @@ export async function POST(req: NextRequest) {
         { status: 429 },
       );
     }
-    const { agentName, message, memberId } = await req.json();
+    const body = await req.json();
+    const guard = humanGuard(req, body);
+    if (guard) return guard;
+    const { agentName, message, memberId } = body;
     if (!message || typeof message !== 'string' || message.length > 4000) {
       return NextResponse.json({ error: 'Invalid message' }, { status: 400 });
     }

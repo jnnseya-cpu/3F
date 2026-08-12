@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
+import { humanGuard } from '@/lib/guard';
 
 /**
  * Contribution checkout — BitriPay integration.
@@ -29,7 +30,10 @@ export async function POST(req: NextRequest) {
     if (!rateLimit(`checkout:${clientIp(req.headers)}`, 5, 60_000)) {
       return NextResponse.json({ error: 'Trop de requêtes' }, { status: 429 });
     }
-    const { plan = 'annual', memberId, phone } = await req.json();
+    const body = await req.json();
+    const guard = humanGuard(req, body);
+    if (guard) return guard;
+    const { plan = 'annual', memberId, phone } = body;
 
     const selected = PLANS[plan];
     if (!selected) {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { humanFetch } from '@/lib/humanClient';
 import { Send, Bot, User, Loader2, Sparkles, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
@@ -60,7 +61,7 @@ export default function NTOSAgentPanel({
     setLoading(true);
 
     try {
-      const res = await fetch('/api/agents/chat', {
+      const res = await humanFetch('/api/agents/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ agentName: `SNTO-${agentId}`, message: content, memberId: getMemberId() }),

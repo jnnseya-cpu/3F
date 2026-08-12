@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { humanFetch } from '@/lib/humanClient';
 import { Send, Bot, User, Loader2, Sparkles } from 'lucide-react';
 
 
@@ -48,7 +49,7 @@ export default function AIAgentPanel({
     setLoading(true);
 
     try {
-      const res = await fetch('/api/agents/chat', {
+      const res = await humanFetch('/api/agents/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ agentName, message: input, memberId: getMemberId() }),
