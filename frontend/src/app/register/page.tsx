@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { humanFetch } from '@/lib/humanClient';
 import { CheckCircle, User, MapPin, BookOpen, Briefcase, Star, DollarSign, ChevronRight, ChevronLeft, AlertCircle } from 'lucide-react';
 import { DRC_PROVINCES, CONTINENTS, AFRICAN_COUNTRIES } from '@/lib/provinces';
@@ -85,6 +85,15 @@ export default function RegisterPage() {
   const [form, setForm] = useState<FormData>(initialForm);
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    const ref = new URLSearchParams(window.location.search).get('ref');
+    if (ref && /^[A-Z0-9]{4,12}$/.test(ref)) {
+      setReferralCode(ref);
+      try { localStorage.setItem('lcd_referred_by', ref); } catch { /* noop */ }
+    }
+  }, []);
 
   const update = (field: keyof FormData, value: string | boolean | string[]) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -159,6 +168,15 @@ export default function RegisterPage() {
     } catch {
       // offline or API down — registration UX continues
     }
+    if (referralCode) {
+      try {
+        await humanFetch('/api/referral/track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: referralCode }),
+        });
+      } catch { /* non-blocking */ }
+    }
     setSubmitted(true);
   };
 
@@ -184,6 +202,11 @@ export default function RegisterPage() {
               <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-green-500" /> Rejoindre votre cellule locale</li>
               <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-green-500" /> Consulter le tableau de bord de votre province</li>
             </ul>
+          </div>
+          <div className="bg-drc-yellow/15 border border-drc-yellow rounded-xl p-4 mb-6">
+            <p className="font-black text-gray-900 text-sm mb-1">🚀 Faites grandir le mouvement</p>
+            <p className="text-gray-600 text-sm mb-3">Invitez 3 proches dès aujourd&apos;hui. C&apos;est ainsi qu&apos;un pays se transforme.</p>
+            <a href="/invite" className="inline-block bg-green-600 text-white font-bold px-5 py-2.5 rounded-lg text-sm hover:bg-green-700">Inviter mes proches sur WhatsApp</a>
           </div>
           <div className="flex gap-3 justify-center flex-wrap">
             <a href="/dashboard" className="btn-primary text-sm">Accéder au tableau de bord</a>

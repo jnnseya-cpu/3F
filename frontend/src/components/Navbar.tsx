@@ -29,6 +29,7 @@ export default function Navbar({ language, setLanguage }: NavbarProps) {
     { href: '/projects', label: 'SNTO Projets' },
     { href: '/blog', label: 'Blog' },
     { href: '/growth', label: 'Growth IA' },
+    { href: '/invite', label: 'Inviter' },
     { href: '/security', label: 'Sentinel' },
   ];
 
