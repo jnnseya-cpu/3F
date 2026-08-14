@@ -14,6 +14,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   const post = getPostBySlug(params.slug);
   if (!post) return {};
   const url = `${BASE}/blog/${post.slug}`;
+  const locale = post.lang === 'ln' ? 'ln_CD' : post.lang === 'sw' ? 'sw_CD' : 'fr_CD';
   return {
     title: post.title,
     description: post.description,
@@ -24,7 +25,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
       description: post.description,
       url,
       siteName: "Le Congo D'Abord",
-      locale: 'fr_CD',
+      locale,
       type: 'article',
       publishedTime: post.date,
       authors: [post.author],
@@ -75,7 +76,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
     publisher: { '@type': 'Organization', name: "Le Congo D'Abord", url: BASE },
     mainEntityOfPage: `${BASE}/blog/${post.slug}`,
     keywords: post.keywords.join(', '),
-    inLanguage: 'fr',
+    inLanguage: post.lang || 'fr',
   };
 
   return (
