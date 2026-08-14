@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { BLOG_POSTS } from '@/lib/blogPosts';
+import { DRC_PROVINCES } from '@/lib/provinces';
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://congodabord.cd';
 
@@ -35,5 +36,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: 'weekly' as const,
   }));
 
-  return [...staticPages, ...blogPages];
+  const provincePages = [
+    { url: `${BASE}/province`, lastModified: now, priority: 0.7, changeFrequency: 'monthly' as const },
+    ...DRC_PROVINCES.map(p => ({
+      url: `${BASE}/province/${p.id}`,
+      lastModified: now,
+      priority: 0.6,
+      changeFrequency: 'monthly' as const,
+    })),
+  ];
+
+  return [...staticPages, ...blogPages, ...provincePages];
 }
