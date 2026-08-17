@@ -28,11 +28,12 @@ Growth: `/growth` + `/growth/[tool]` (10 tools)
 SEO: `/blog` + `/blog/[slug]` (35 articles) · `/province` + `/province/[slug]` (26 provinces)
 Referral: `/invite` · Security: `/security`
 
-## API routes (11 — all ✅)
+## API routes (13 — all ✅)
 `/api/agents/chat` · `/api/growth/generate` · `/api/members/register`
 `/api/payments/checkout` · `/api/payments/webhook` · `/api/acu/balance`
 `/api/referral/track` · `/api/security/challenge` · `/api/security/sentinel`
-`/api/seo/autopilot` · `/api/auth/[...nextauth]`
+`/api/seo/autopilot` · `/api/newsletter/send` · `/api/newsletter/unsubscribe`
+· `/api/auth/[...nextauth]`
 
 ## Systems built (✅ — each done once, do not repeat)
 | System | What it does | File(s) |
@@ -49,6 +50,7 @@ Referral: `/invite` · Security: `/security`
 | SEO engine | 35 blog articles (FR/Lingala/Swahili) + 26 province pages, JSON-LD, sitemap, robots | `lib/blogPosts.ts`, `/blog`, `/province`, `sitemap.ts`, `robots.ts` |
 | SEO autopilot | Daily cron writes 1 article | `api/seo/autopilot`, `vercel.json` crons |
 | Referral loop | WhatsApp invite + tracking | `/invite`, `api/referral/track` |
+| Weekly newsletter | Cron sends feature-selling email (12-link grid + spotlight + latest articles) to all opted-in members; HMAC one-click unsubscribe; idempotent per ISO-week | `lib/newsletter.ts`, `api/newsletter/*`, `vercel.json` crons |
 
 ## Design invariants (do not change without a reason)
 - Party name is exactly **"Le Congo D'Abord"** everywhere.
@@ -65,6 +67,7 @@ Referral: `/invite` · Security: `/security`
 | `FIREBASE_PROJECT_ID` + `FIREBASE_API_KEY` | Member records, ACU ledger, referrals persist |
 | `BITRIPAY_API_KEY` + `BITRIPAY_API_URL` + `BITRIPAY_WEBHOOK_SECRET` | Real payments → bank |
 | `HUMAN_GATE_SECRET`, `SENTINEL_ADMIN_KEY`, `CRON_SECRET` | Security hardening |
+| `RESEND_API_KEY` (+ `NEWSLETTER_FROM`, `NEWSLETTER_SECRET`) | Weekly newsletter delivery |
 | `NEXT_PUBLIC_SITE_URL` | Correct canonical/sitemap URLs |
 
 ## 👤 USER ACTION (only the user can do — long lead time, start early)
