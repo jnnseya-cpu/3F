@@ -51,6 +51,7 @@ Referral: `/invite` · Security: `/security`
 | SEO autopilot | Daily cron writes 1 article | `api/seo/autopilot`, `vercel.json` crons |
 | Referral loop | WhatsApp invite + tracking | `/invite`, `api/referral/track` |
 | Weekly newsletter | Cron sends feature-selling email (12-link grid + spotlight + latest articles) to all opted-in members; HMAC one-click unsubscribe; idempotent per ISO-week | `lib/newsletter.ts`, `api/newsletter/*`, `vercel.json` crons |
+| PWA + splash | Installable web app manifest (Android/Chrome auto-splash: blue bg + star icon) + 9 iOS apple-touch-startup-image splash screens + maskable/apple icons | `app/manifest.ts`, `layout.tsx` (appleWebApp/viewport), `public/*.png` |
 
 ## Design invariants (do not change without a reason)
 - Party name is exactly **"Le Congo D'Abord"** everywhere.
