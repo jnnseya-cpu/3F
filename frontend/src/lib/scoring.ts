@@ -79,7 +79,7 @@ export function educationLevelToScore(level: string): number {
 }
 
 export function getScoreColor(score: number): string {
-  if (score >= 75) return '#006400'; // dark green — excellent
+  if (score >= 75) return '#15803D'; // emerald — excellent (semantic)
   if (score >= 60) return '#22c55e'; // green — good
   if (score >= 45) return '#FCD116'; // yellow — average
   if (score >= 30) return '#f97316'; // orange — below average

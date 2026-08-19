@@ -194,7 +194,7 @@ export default function RegisterPage() {
           <p className="text-gray-500 text-sm mb-6">
             Votre dossier a été transmis à votre coordinateur local. Vous recevrez une confirmation par email à <strong>{form.email}</strong>.
           </p>
-          <div className="bg-blue-50 border border-green-200 rounded-xl p-4 mb-6 text-left">
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-left">
             <h4 className="font-semibold text-drc-blue mb-2">Prochaines étapes :</h4>
             <ul className="space-y-1 text-sm text-gray-700">
               <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-green-500" /> Configurer votre premier paiement de $1 USD</li>
@@ -514,7 +514,7 @@ export default function RegisterPage() {
               <p className="text-gray-500 text-sm mb-6">Configuration de votre engagement financier</p>
 
               {/* Contribution Info */}
-              <div className="bg-blue-50 border border-green-200 rounded-xl p-5 mb-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-6">
                 <div className="flex items-start gap-3">
                   <div className="w-12 h-12 bg-drc-blue rounded-xl flex items-center justify-center shrink-0">
                     <DollarSign className="w-6 h-6 text-drc-yellow" />

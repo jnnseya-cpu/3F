@@ -33,7 +33,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <p className="text-blue-300 text-sm mt-1">Kinshasa, RD Congo</p>
           </div>
         </div>
-        <div className="border-t border-green-800 text-center py-4 text-blue-300 text-xs">
+        <div className="border-t border-drc-blue-dark text-center py-4 text-blue-300 text-xs">
           © 2025 Le Congo D&apos;Abord. Tous droits réservés.
         </div>
       </footer>

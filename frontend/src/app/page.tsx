@@ -19,7 +19,7 @@ const SLOGANS = [
 ];
 
 const AI_AGENTS = [
-  { icon: Users, title: "Inscription des membres", desc: "Enregistre chaque membre dans la structure administrative de la RDC.", color: "bg-green-100 text-green-700" },
+  { icon: Users, title: "Inscription des membres", desc: "Enregistre chaque membre dans la structure administrative de la RDC.", color: "bg-blue-100 text-blue-700" },
   { icon: MapPin, title: "Cartographie administrative", desc: "Mappe chaque membre du village au niveau national.", color: "bg-blue-100 text-blue-700" },
   { icon: Brain, title: "Analyse CV & Compétences", desc: "Évalue l'éducation, l'expérience et l'aptitude au leadership.", color: "bg-purple-100 text-purple-700" },
   { icon: Star, title: "Sélection des candidats", desc: "Propose 3 personnes qualifiées pour chaque rôle.", color: "bg-yellow-100 text-yellow-700" },
@@ -356,7 +356,7 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          <div className="mt-10 p-4 bg-blue-50 rounded-xl border border-green-100 text-sm text-gray-600">
+          <div className="mt-10 p-4 bg-blue-50 rounded-xl border border-blue-100 text-sm text-gray-600">
             <strong className="text-drc-blue">Engagement de confidentialité :</strong> Vos données sont utilisées
             uniquement pour la gestion du parti. Aucune surveillance privée, aucune vente de données,
             aucune exploitation politique sans votre consentement.

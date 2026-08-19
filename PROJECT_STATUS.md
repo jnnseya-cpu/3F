@@ -81,9 +81,25 @@ Referral: `/invite` · Security: `/security`
 
 ## Known limitations (honest)
 - Lingala/Swahili articles were AI-authored; need native review (see above).
-- No native mobile app / offline mode (web only).
+- No native mobile app / offline mode (web only, but installable PWA).
 - No CENI voter-file integration.
-- Auth is demo-level until Firebase is connected.
+- **Auth is dormant scaffolding.** `/api/auth/[...nextauth]` holds a single demo
+  credential and is NOT used by any page (no `useSession`/`SessionProvider`, no
+  `/login` page, no protected routes). Real auth arrives with Firebase near launch.
+- **`backend/` (FastAPI) is not wired to the deployed frontend.** The frontend is
+  self-contained: it calls its own `frontend/src/app/api/*` routes, which talk to
+  Anthropic/OpenAI/Gemini/Firebase/BitriPay directly. `backend/` is kept as the
+  reference implementation of the 23 agents for a future scale-out; it is NOT dead
+  by accident — do not delete without deciding the scale-out story.
+- Dashboards/contributions/candidates/infrastructure/ethics show illustrative demo
+  data, each wrapped in `<DemoDataBanner/>`. Real data replaces it once Firebase is live.
+
+## Audit log
+- **Day-20 deep audit** (this pass): cleared all retired green-brand color
+  leftovers (charts, card borders, footer, landing card, score scale) → DRC blue;
+  added missing `<DemoDataBanner/>` to infrastructure & ethics; deleted orphaned
+  `MemberCard.tsx`; added ESLint config (`next lint` clean); labeled the consent
+  checkbox; documented dormant auth + orphaned backend above. Build & typecheck green.
 
 ## The one rule to avoid past confusion
 Before building a "new" feature, **check this file and `git log` first.** If it's

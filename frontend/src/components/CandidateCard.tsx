@@ -93,7 +93,7 @@ export default function CandidateCard({ member, scores, rank, justification, ris
 
       {/* AI Justification */}
       {justification && (
-        <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-green-100">
+        <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
           <div className="flex items-start gap-2">
             <CheckCircle className="w-4 h-4 text-drc-blue mt-0.5 shrink-0" />
             <p className="text-xs text-gray-700">{justification}</p>

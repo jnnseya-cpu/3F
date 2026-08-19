@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import DemoDataBanner from '@/components/DemoDataBanner';
 import { Map, AlertTriangle, Zap, Droplets, Navigation, Heart, BookOpen, Wifi, Leaf, Brain } from 'lucide-react';
 import AIAgentPanel from '@/components/AIAgentPanel';
 import { MOCK_INFRASTRUCTURE_NEEDS } from '@/lib/mockData';
@@ -39,6 +40,7 @@ export default function InfrastructurePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <DemoDataBanner />
       <div className="bg-drc-blue text-white">
         <div className="flag-stripe" />
         <div className="max-w-7xl mx-auto px-4 py-6">

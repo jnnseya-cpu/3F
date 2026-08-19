@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import DemoDataBanner from '@/components/DemoDataBanner';
 import { Shield, AlertTriangle, CheckCircle, Clock, FileText, Brain, Users } from 'lucide-react';
 import AIAgentPanel from '@/components/AIAgentPanel';
 import { MOCK_ETHICS_CASES } from '@/lib/mockData';
@@ -31,6 +32,7 @@ export default function EthicsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <DemoDataBanner />
       <div className="bg-drc-blue text-white">
         <div className="flag-stripe" />
         <div className="max-w-7xl mx-auto px-4 py-6">
@@ -131,7 +133,7 @@ export default function EthicsPage() {
                     <p className="text-gray-700 text-sm mb-3">{c.description}</p>
 
                     {c.resolution && (
-                      <div className="p-3 bg-blue-50 rounded-lg border border-green-100">
+                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
                         <p className="text-xs font-semibold text-green-700 mb-1">Résolution</p>
                         <p className="text-sm text-gray-700">{c.resolution}</p>
                       </div>
@@ -196,8 +198,8 @@ export default function EthicsPage() {
                   <label className="form-label">Preuves disponibles (description)</label>
                   <textarea className="form-input" rows={2} placeholder="Ex: Témoins, documents, photos, vidéos..." />
                 </div>
-                <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg border border-green-100">
-                  <input type="checkbox" className="mt-0.5" />
+                <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                  <input type="checkbox" className="mt-0.5" aria-label="J'accepte la charte d'éthique et confirme la véracité des informations" />
                   <p className="text-sm text-gray-700">
                     Je déclare que les informations fournies sont vraies à ma connaissance et j'accepte
                     que mon identité soit protégée selon la Charte d'éthique CDP.
@@ -254,7 +256,7 @@ export default function EthicsPage() {
                 ))}
               </div>
 
-              <div className="mt-8 p-4 bg-blue-50 rounded-xl border border-green-200 text-center">
+              <div className="mt-8 p-4 bg-blue-50 rounded-xl border border-blue-200 text-center">
                 <p className="text-drc-blue font-bold">Signé et approuvé par</p>
                 <p className="text-gray-900 font-black text-lg mt-1">Mr Justin Nseya</p>
                 <p className="text-gray-500 text-sm">Fondateur & Président — Le Congo D’Abord</p>

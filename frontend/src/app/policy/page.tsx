@@ -104,7 +104,7 @@ export default function PolicyPage() {
                           </p>
                           <p className="text-sm text-gray-700">{proposal.targetBeneficiaries}</p>
                         </div>
-                        <div className="p-3 bg-blue-50 rounded-xl border border-green-100">
+                        <div className="p-3 bg-blue-50 rounded-xl border border-blue-100">
                           <p className="text-xs font-semibold text-green-700 mb-1 flex items-center gap-1">
                             <TrendingUp className="w-3.5 h-3.5" /> Impact estimé
                           </p>

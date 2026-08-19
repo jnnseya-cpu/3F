@@ -17,7 +17,7 @@ const MONTHLY_DATA = [
 ];
 
 const STATUS_BREAKDOWN = [
-  { name: 'Actif', value: 27340, color: '#006400', status: 'Active' as ContributionStatus },
+  { name: 'Actif', value: 27340, color: '#007FFF', status: 'Active' as ContributionStatus },
   { name: 'Période de grâce', value: 4210, color: '#FCD116', status: 'Grace Period' as ContributionStatus },
   { name: 'Suspendu', value: 3120, color: '#CE1126', status: 'Suspended' as ContributionStatus },
   { name: 'Inéligible', value: 1890, color: '#6b7280', status: 'Ineligible' as ContributionStatus },
@@ -149,7 +149,7 @@ export default function ContributionsPage() {
                     <XAxis dataKey="month" tick={{ fontSize: 12 }} />
                     <YAxis tickFormatter={v => `$${(v/1000).toFixed(0)}k`} tick={{ fontSize: 11 }} />
                     <Tooltip formatter={v => [`$${Number(v).toLocaleString()}`, '']} />
-                    <Bar dataKey="collected" fill="#006400" name="Collecté" radius={[4,4,0,0]} />
+                    <Bar dataKey="collected" fill="#007FFF" name="Collecté" radius={[4,4,0,0]} />
                     <Bar dataKey="target" fill="#e5e7eb" name="Objectif" radius={[4,4,0,0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -262,7 +262,7 @@ export default function ContributionsPage() {
         {/* Transparency Tab */}
         {activeTab === 'transparency' && (
           <div className="space-y-6">
-            <div className="card bg-blue-50 border-green-200">
+            <div className="card bg-blue-50 border-blue-200">
               <div className="flex items-start gap-3">
                 <CheckCircle className="w-6 h-6 text-drc-blue mt-0.5" />
                 <div>

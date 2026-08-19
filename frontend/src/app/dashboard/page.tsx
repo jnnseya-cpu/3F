@@ -84,12 +84,13 @@ const MONTHLY_TREND = [
 
 const TOP_5_PROVINCES = getTopProvincesByMembers(5);
 
+// Palette aligned to the DRC flag (blue shades + yellow + red) — no retired green brand
 const DIASPORA_DATA = [
-  { name: 'Europe', value: 2140, color: '#006400' },
-  { name: 'Afrique', value: 1230, color: '#008000' },
+  { name: 'Europe', value: 2140, color: '#007FFF' },
+  { name: 'Afrique', value: 1230, color: '#0055CC' },
   { name: 'Amériques', value: 780, color: '#FCD116' },
   { name: 'Asie', value: 370, color: '#CE1126' },
-  { name: 'Océanie', value: 200, color: '#004d00' },
+  { name: 'Océanie', value: 200, color: '#3399FF' },
 ];
 
 const ROLE_GAPS = [
@@ -169,7 +170,7 @@ export default function FounderDashboard() {
                       typeof val === 'number' ? val.toLocaleString() : val,
                       name === 'members' ? 'Membres' : 'Recettes ($)'
                     ]} />
-                    <Line type="monotone" dataKey="members" stroke="#006400" strokeWidth={2.5} dot={{ fill: '#006400', r: 4 }} />
+                    <Line type="monotone" dataKey="members" stroke="#007FFF" strokeWidth={2.5} dot={{ fill: '#007FFF', r: 4 }} />
                     <Line type="monotone" dataKey="revenue" stroke="#FCD116" strokeWidth={2} dot={{ fill: '#FCD116', r: 3 }} />
                   </LineChart>
                 </ResponsiveContainer>
@@ -277,7 +278,7 @@ export default function FounderDashboard() {
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} />
                   <Tooltip formatter={(val) => [Number(val).toLocaleString(), '']} />
-                  <Bar dataKey="membres" fill="#006400" name="Membres" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="membres" fill="#007FFF" name="Membres" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="cotisants" fill="#FCD116" name="Cotisants actifs" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -332,7 +333,7 @@ export default function FounderDashboard() {
         {/* Candidates Tab */}
         {activeTab === 'candidates' && (
           <div className="space-y-6">
-            <div className="card bg-blue-50 border-green-100">
+            <div className="card bg-blue-50 border-blue-100">
               <div className="flex items-start gap-3">
                 <Brain className="w-6 h-6 text-drc-blue mt-0.5 shrink-0" />
                 <div>
@@ -418,7 +419,7 @@ export default function FounderDashboard() {
                   <XAxis dataKey="month" />
                   <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
                   <Tooltip formatter={(v) => [`$${Number(v).toLocaleString()}`, 'Recettes']} />
-                  <Bar dataKey="revenue" fill="#006400" radius={[6, 6, 0, 0]} name="Recettes" />
+                  <Bar dataKey="revenue" fill="#007FFF" radius={[6, 6, 0, 0]} name="Recettes" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
