@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { humanFetch } from '@/lib/humanClient';
+import { trackRegistration } from '@/lib/analytics';
 import { CheckCircle, User, MapPin, BookOpen, Briefcase, Star, DollarSign, ChevronRight, ChevronLeft, AlertCircle } from 'lucide-react';
 import { DRC_PROVINCES, CONTINENTS, AFRICAN_COUNTRIES } from '@/lib/provinces';
 
@@ -177,6 +178,7 @@ export default function RegisterPage() {
         });
       } catch { /* non-blocking */ }
     }
+    trackRegistration('web');
     setSubmitted(true);
   };
 

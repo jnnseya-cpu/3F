@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { trackAIAction } from '@/lib/analytics';
 import { humanFetch } from '@/lib/humanClient';
 import { Send, Bot, User, Loader2, Sparkles } from 'lucide-react';
 
@@ -47,6 +48,7 @@ export default function AIAgentPanel({
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setLoading(true);
+    trackAIAction(agentName);
 
     try {
       const res = await humanFetch('/api/agents/chat', {

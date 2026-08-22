@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { humanFetch } from '@/lib/humanClient';
+import { trackGrowthTool } from '@/lib/analytics';
 import { Loader2, Sparkles, Copy, Check, RotateCcw } from 'lucide-react';
 import { getGrowthTool } from '@/lib/growthTools';
 
@@ -30,6 +31,7 @@ export default function GrowthToolPanel({ toolId }: { toolId: string }) {
     setLoading(true);
     setOutput('');
     setIsDemo(false);
+    trackGrowthTool(toolId);
     try {
       const res = await humanFetch('/api/growth/generate', {
         method: 'POST',

@@ -1,6 +1,7 @@
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
 import AppShell from '@/components/AppShell';
+import AnalyticsScripts from '@/components/AnalyticsScripts';
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://congodabord.cd';
 
@@ -94,6 +95,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="bg-gray-50 min-h-screen">
+        <AnalyticsScripts />
         <AppShell>{children}</AppShell>
       </body>
     </html>

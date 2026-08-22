@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { humanFetch } from '@/lib/humanClient';
+import { trackReferralShare } from '@/lib/analytics';
 import { Users, Share2, Copy, Check, Gift, TrendingUp, Loader2, Sparkles } from 'lucide-react';
 
 const BASE = typeof window !== 'undefined' ? window.location.origin : 'https://congodabord.cd';
@@ -53,6 +54,7 @@ export default function InvitePage() {
   const link = `${BASE}/register?ref=${code}`;
 
   const copy = async (text: string, id: string) => {
+    trackReferralShare(id);
     try {
       await navigator.clipboard.writeText(text);
       setCopied(id);

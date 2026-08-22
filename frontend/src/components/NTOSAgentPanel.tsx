@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { humanFetch } from '@/lib/humanClient';
+import { trackAIAction } from '@/lib/analytics';
 import { Send, Bot, User, Loader2, Sparkles, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
@@ -59,6 +60,7 @@ export default function NTOSAgentPanel({
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setLoading(true);
+    trackAIAction(`SNTO-${agentId}`);
 
     try {
       const res = await humanFetch('/api/agents/chat', {

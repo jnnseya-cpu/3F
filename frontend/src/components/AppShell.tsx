@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Navbar from '@/components/Navbar';
+import PageViewTracker from '@/components/PageViewTracker';
 import type { Language } from '@/lib/translations';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
@@ -9,6 +10,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      <PageViewTracker />
       <Navbar language={language} setLanguage={setLanguage} />
       <main>{children}</main>
       <footer className="bg-drc-blue-dark text-white mt-16">

@@ -51,6 +51,7 @@ Referral: `/invite` · Security: `/security`
 | SEO autopilot | Daily cron writes 1 article | `api/seo/autopilot`, `vercel.json` crons |
 | Referral loop | WhatsApp invite + tracking | `/invite`, `api/referral/track` |
 | Weekly newsletter | Cron sends feature-selling email (12-link grid + spotlight + latest articles) to all opted-in members; HMAC one-click unsubscribe; idempotent per ISO-week | `lib/newsletter.ts`, `api/newsletter/*`, `vercel.json` crons |
+| Analytics | Meta Pixel + Google tag fired site-wide via one shared tracker: page_view on every route + conversion events (registration, AI chat, growth tools, referral share); env-gated, no-op when unset; CSP allowlisted | `lib/analytics.ts`, `components/AnalyticsScripts.tsx`, `components/PageViewTracker.tsx` |
 | PWA + splash | Installable web app manifest (Android/Chrome auto-splash: blue bg + star icon) + 9 iOS apple-touch-startup-image splash screens + maskable/apple icons | `app/manifest.ts`, `layout.tsx` (appleWebApp/viewport), `public/*.png` |
 
 ## Design invariants (do not change without a reason)
@@ -69,6 +70,7 @@ Referral: `/invite` · Security: `/security`
 | `BITRIPAY_API_KEY` + `BITRIPAY_API_URL` + `BITRIPAY_WEBHOOK_SECRET` | Real payments → bank |
 | `HUMAN_GATE_SECRET`, `SENTINEL_ADMIN_KEY`, `CRON_SECRET` | Security hardening |
 | `RESEND_API_KEY` (+ `NEWSLETTER_FROM`, `NEWSLETTER_SECRET`) | Weekly newsletter delivery |
+| `NEXT_PUBLIC_META_PIXEL_ID`, `NEXT_PUBLIC_GA_ID` | Meta Pixel + Google tag analytics |
 | `NEXT_PUBLIC_SITE_URL` | Correct canonical/sitemap URLs |
 
 ## 👤 USER ACTION (only the user can do — long lead time, start early)
