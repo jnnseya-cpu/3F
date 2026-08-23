@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { BLOG_POSTS, getPostBySlug } from '@/lib/blogPosts';
 import { Clock, ChevronRight, ArrowLeft, Share2 } from 'lucide-react';
 import BlogViews from '@/components/BlogViews';
+import SeoScorePanel from '@/components/SeoScorePanel';
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://congodabord.cd';
 
@@ -134,6 +135,9 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             </div>
           </div>
         </div>
+
+        {/* On-page SEO score — computed from the article itself */}
+        <SeoScorePanel post={post} />
 
         {/* Related articles — dynamic cross-links */}
         {related.length > 0 && (
