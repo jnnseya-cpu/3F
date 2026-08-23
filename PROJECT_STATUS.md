@@ -32,7 +32,7 @@ Referral: `/invite` · Security: `/security`
 `/api/agents/chat` · `/api/growth/generate` · `/api/members/register`
 `/api/payments/checkout` · `/api/payments/webhook` · `/api/acu/balance`
 `/api/referral/track` · `/api/security/challenge` · `/api/security/sentinel`
-`/api/seo/autopilot` · `/api/newsletter/send` · `/api/newsletter/unsubscribe`
+`/api/seo/autopilot` · `/api/newsletter/send` · `/api/newsletter/unsubscribe` · `/api/blog/views`
 · `/api/auth/[...nextauth]`
 
 ## Systems built (✅ — each done once, do not repeat)
@@ -51,6 +51,7 @@ Referral: `/invite` · Security: `/security`
 | SEO autopilot | Daily cron writes 1 article | `api/seo/autopilot`, `vercel.json` crons |
 | Referral loop | WhatsApp invite + tracking | `/invite`, `api/referral/track` |
 | Weekly newsletter | Cron sends feature-selling email (12-link grid + spotlight + latest articles) to all opted-in members; HMAC one-click unsubscribe; idempotent per ISO-week | `lib/newsletter.ts`, `api/newsletter/*`, `vercel.json` crons |
+| Blog view counter | Per-article views: atomic Firestore increment (race-safe), bot-filtered + rate-limited + slug-validated; client dedupes per browser via localStorage; hidden until a real count exists (no fabricated numbers) | `api/blog/views`, `components/BlogViews.tsx`, `blog/[slug]/page.tsx` |
 | Analytics | Meta Pixel + Google tag fired site-wide via one shared tracker: page_view on every route + conversion events (registration, AI chat, growth tools, referral share); env-gated, no-op when unset; CSP allowlisted | `lib/analytics.ts`, `components/AnalyticsScripts.tsx`, `components/PageViewTracker.tsx` |
 | PWA + splash | Installable web app manifest (Android/Chrome auto-splash: blue bg + star icon) + 9 iOS apple-touch-startup-image splash screens + maskable/apple icons | `app/manifest.ts`, `layout.tsx` (appleWebApp/viewport), `public/*.png` |
 

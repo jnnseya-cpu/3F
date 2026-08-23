@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { BLOG_POSTS, getPostBySlug } from '@/lib/blogPosts';
 import { Clock, ChevronRight, ArrowLeft, Share2 } from 'lucide-react';
+import BlogViews from '@/components/BlogViews';
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://congodabord.cd';
 
@@ -94,6 +95,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             <span>{post.author}</span>
             <span>{new Date(post.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
             <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {post.readMinutes} min</span>
+            <BlogViews slug={post.slug} />
           </div>
         </div>
       </div>
