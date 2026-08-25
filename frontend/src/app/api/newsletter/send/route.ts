@@ -91,7 +91,12 @@ async function sendEmail(to: string, subject: string, html: string, text: string
 export async function GET(req: NextRequest) {
   // Cron authenticity (same pattern as the SEO autopilot)
   const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret && req.headers.get('authorization') !== `Bearer ${cronSecret}`) {
+  // Fail closed: without a secret this endpoint could be triggered to blast
+  // every member's inbox (cost + spam-list damage). No secret ⇒ no send.
+  if (!cronSecret) {
+    return NextResponse.json({ error: 'Cron not configured' }, { status: 503 });
+  }
+  if (req.headers.get('authorization') !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

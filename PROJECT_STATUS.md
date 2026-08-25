@@ -98,6 +98,21 @@ Referral: `/invite` · Security: `/security`
 - Dashboards/contributions/candidates/infrastructure/ethics show illustrative demo
   data, each wrapped in `<DemoDataBanner/>`. Real data replaces it once Firebase is live.
 
+## Financial integrity (money path — hardened)
+The money path is: BitriPay checkout → webhook → member activation + ACU credit → ACU debit on each AI action. Closed loss vectors:
+- **Webhook fails closed.** No `BITRIPAY_WEBHOOK_SECRET` ⇒ 503, never activates. Signature is HMAC-SHA256 over the raw body (hex or base64) or a static shared secret, always constant-time compared.
+- **Webhook is idempotent.** Each payment id is claimed once in `processed_payments/{txId}` via an atomic *create-if-absent* precondition. Replays/retries never re-credit ACUs or re-extend membership.
+- **Grants come from the verified paid amount**, not client metadata (`lib/plans.ts` is the single price→benefit source). A $1 payment cannot claim the annual plan; non-USD amounts are rejected.
+- **ACU debit is atomic** (compare-and-swap on the doc `updateTime`, bounded retries). Concurrent requests can't each spend the same balance → no TOCTOU free-AI race. Credit uses an atomic increment transform.
+- **Failed AI actions are refunded.** chat/growth/autopilot credit the ACU back when every provider is down, so members are never charged for nothing (removes a refund/chargeback surface).
+- **Cron endpoints fail closed.** No `CRON_SECRET` ⇒ 503 on `/api/seo/autopilot` (AI spend) and `/api/newsletter/send` (mass email), so neither is publicly triggerable.
+
+### Remaining money-path gaps to close before launch (documented, not yet fixed)
+- **`memberId` is an unauthenticated bearer.** Any caller who knows a member's Firestore id can spend that member's ACUs (griefing) — no financial gain to the attacker, but real ACU loss. Real fix arrives with Firebase Auth (currently dormant): bind AI/ACU calls to an authenticated session, not a body field.
+- **Referral counter (`/api/referral/track`) is inflatable.** Public, self-referral-capable, no dedupe. Harmless while referrals pay nothing — but **any future referral reward must be derived server-side from actual paid conversions** (a referred member whose webhook fired), never from this counter. Do not attach ACU/cash rewards to it as-is.
+- **Rate limiting is per-instance in-memory** (`lib/rateLimit.ts`) — weak across serverless instances. For money endpoints (checkout/webhook) move to a shared store (Firestore/Upstash) before high traffic.
+- **Chargebacks/reversals** (mobile-money reversal after ACUs are spent) are not handled — add a webhook branch on refund/chargeback events to deduct remaining ACUs and set membership back to `pending_payment`.
+
 ## Audit log
 - **Day-20 deep audit** (this pass): cleared all retired green-brand color
   leftovers (charts, card borders, footer, landing card, score scale) → DRC blue;

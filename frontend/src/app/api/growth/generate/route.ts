@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
 import { humanGuard } from '@/lib/guard';
-import { debit, ACU_COSTS } from '@/lib/acu';
+import { debit, refund, ACU_COSTS } from '@/lib/acu';
 
 /**
  * AI Growth Engine — generation endpoint.
@@ -114,6 +114,7 @@ export async function POST(req: NextRequest) {
 
     const result = await generate(promptBuilder(clean));
     if (!result) {
+      await refund(memberId, ACU_COSTS.growth);
       return NextResponse.json({ error: 'AI indisponible' }, { status: 503 });
     }
     return NextResponse.json({ output: result.text, provider: result.provider, acuRemaining: charge.remaining });

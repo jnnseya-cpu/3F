@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
 import { humanGuard } from '@/lib/guard';
+import { getPlan } from '@/lib/plans';
 
 /**
  * Contribution checkout — BitriPay integration.
@@ -19,12 +20,6 @@ import { humanGuard } from '@/lib/guard';
  * below to match their API documentation when you receive merchant access.
  */
 
-const PLANS: Record<string, { amount: number; label: string; months: number }> = {
-  monthly: { amount: 1, label: 'Cotisation mensuelle — Le Congo D’Abord', months: 1 },
-  quarterly: { amount: 3, label: 'Cotisation trimestrielle — Le Congo D’Abord', months: 3 },
-  annual: { amount: 12, label: 'Cotisation annuelle — Le Congo D’Abord', months: 12 },
-};
-
 export async function POST(req: NextRequest) {
   try {
     if (!rateLimit(`checkout:${clientIp(req.headers)}`, 5, 60_000)) {
@@ -35,7 +30,7 @@ export async function POST(req: NextRequest) {
     if (guard) return guard;
     const { plan = 'annual', memberId, phone } = body;
 
-    const selected = PLANS[plan];
+    const selected = getPlan(plan);
     if (!selected) {
       return NextResponse.json({ error: 'Plan invalide (monthly|quarterly|annual)' }, { status: 400 });
     }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { debit, ACU_COSTS } from '@/lib/acu';
+import { debit, refund, ACU_COSTS } from '@/lib/acu';
 
 /**
  * SEO Autopilot — runs on a daily Vercel cron (see vercel.json "crons").
@@ -121,8 +121,12 @@ function slugify(title: string): string {
 export async function GET(req: NextRequest) {
   // Verify cron authenticity
   const cronSecret = process.env.CRON_SECRET;
-  const auth = req.headers.get('authorization');
-  if (cronSecret && auth !== `Bearer ${cronSecret}`) {
+  // Fail closed: without a configured secret this AI-spending endpoint must
+  // not be publicly triggerable (would let anyone burn the party's ACUs/API).
+  if (!cronSecret) {
+    return NextResponse.json({ error: 'Cron not configured' }, { status: 503 });
+  }
+  if (req.headers.get('authorization') !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -142,6 +146,7 @@ export async function GET(req: NextRequest) {
 
   const article = await generateArticle(topic);
   if (!article) {
+    await refund('system-autopilot', ACU_COSTS.autopilot);
     return NextResponse.json({ status: 'skipped', reason: 'no AI provider available' }, { status: 503 });
   }
 

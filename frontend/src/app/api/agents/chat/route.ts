@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
 import { humanGuard } from '@/lib/guard';
-import { debit, ACU_COSTS } from '@/lib/acu';
+import { debit, refund, ACU_COSTS } from '@/lib/acu';
 
 /**
  * AI Agent chat — multi-provider router with automatic fallback.
@@ -140,7 +140,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // No provider configured or all failed
+    // No provider configured or all failed — refund the charge (no value delivered)
+    await refund(memberId, ACU_COSTS.chat);
     console.error('All AI providers unavailable:', errors.join(' | '));
     return NextResponse.json(
       { error: 'AI service unavailable', detail: errors.length ? 'all providers failed' : 'no provider configured' },
