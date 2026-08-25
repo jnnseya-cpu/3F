@@ -6,7 +6,9 @@
 
 ## What this is
 An AI-powered political party platform for the DRC, founded by Mr Justin Nseya.
-Membership: **1 USD/month** or **12 USD/year**. Launch target: **2027**.
+Membership: **1 USD/month** or **12 USD/year**. Launch target: **4 January 2027**
+(Journée des Martyrs, 00:00 Kinshasa / UTC+1) — a live countdown runs in the
+homepage hero (`components/LaunchCountdown.tsx`).
 
 ## Repo & structure
 - GitHub: `jnnseya-cpu/3F`, branch `claude/gracious-allen-WiiR5`

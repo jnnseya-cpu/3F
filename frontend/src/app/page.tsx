@@ -9,6 +9,7 @@ import {
 import { translations } from '@/lib/translations';
 import type { Language } from '@/lib/translations';
 import { DRC_PROVINCES, getTotalMembers, getTotalActiveContributors } from '@/lib/provinces';
+import LaunchCountdown from '@/components/LaunchCountdown';
 
 const SLOGANS = [
   { lang: 'Français', text: "Le Congo d'abord. La compétence avant les promesses." },
@@ -130,6 +131,9 @@ export default function LandingPage() {
                 Tableau de bord <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
+
+            {/* Countdown to national launch — 4 January 2027 */}
+            <LaunchCountdown />
           </div>
         </div>
 
