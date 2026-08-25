@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
 import { humanGuard } from '@/lib/guard';
+import { issueMemberToken } from '@/lib/memberAuth';
+import { adminDb } from '@/lib/firebaseAdmin';
 
 /**
  * Member registration — persists to Firebase Firestore via REST API.
@@ -59,13 +61,37 @@ export async function POST(req: NextRequest) {
     const projectId = process.env.FIREBASE_PROJECT_ID;
     const apiKey = process.env.FIREBASE_API_KEY;
 
-    const record = {
-      ...body,
+    // Whitelist client-supplied fields — never spread the raw body, or a
+    // client could inject status/paidUntil/contributionStatus and self-activate.
+    const record: Record<string, unknown> = {
+      firstName: body.firstName.trim(),
+      lastName: body.lastName.trim(),
+      email: body.email,
+      phone: body.phone,
+      province: body.province,
+      territory: body.territory,
+      commune: body.commune,
+      village: body.village,
+      education: body.education,
+      profession: body.profession,
+      languages: body.languages,
+      paymentMethod: body.paymentMethod,
+      // Server-controlled, non-overridable financial/state fields:
       status: 'pending_payment',
       contributionStatus: 'Ineligible',
       registeredAt: new Date().toISOString(),
       source: 'web',
     };
+
+    // Preferred: Admin SDK (works under locked, server-only Firestore rules)
+    const db = adminDb();
+    if (db) {
+      const ref = await db.collection('members').add(record);
+      return NextResponse.json(
+        { status: 'registered', memberId: ref.id, memberToken: issueMemberToken(ref.id) },
+        { status: 201 },
+      );
+    }
 
     if (!projectId || !apiKey) {
       // Firebase not configured yet — accept and log so the UX works pre-launch
@@ -91,7 +117,10 @@ export async function POST(req: NextRequest) {
 
     const doc = await res.json();
     const memberId = doc.name?.split('/').pop();
-    return NextResponse.json({ status: 'registered', memberId }, { status: 201 });
+    return NextResponse.json(
+      { status: 'registered', memberId, memberToken: issueMemberToken(memberId) },
+      { status: 201 },
+    );
   } catch (error) {
     console.error('Registration API error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

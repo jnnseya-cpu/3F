@@ -148,7 +148,7 @@ export default function RegisterPage() {
     // The success screen shows regardless — a failed network call must not
     // block a citizen's registration; the record is retried server-side.
     try {
-      await humanFetch('/api/members/register', {
+      const res = await humanFetch('/api/members/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -166,6 +166,13 @@ export default function RegisterPage() {
           paymentMethod: form.paymentMethod,
         }),
       });
+      // Persist the server-issued identity + session token so AI/ACU calls
+      // can authenticate the member (see lib/memberAuth.ts).
+      try {
+        const data = await res.json();
+        if (data?.memberId) localStorage.setItem('lcd_member_id', data.memberId);
+        if (data?.memberToken) localStorage.setItem('lcd_member_token', data.memberToken);
+      } catch { /* non-JSON / queued */ }
     } catch {
       // offline or API down — registration UX continues
     }

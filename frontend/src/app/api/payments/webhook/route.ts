@@ -1,27 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createHmac, timingSafeEqual } from 'crypto';
-import { credit } from '@/lib/acu';
+import { credit, deductToFloor } from '@/lib/acu';
 import { getPlan, planForAmount, type Plan } from '@/lib/plans';
+import { adminDb } from '@/lib/firebaseAdmin';
 
 /**
- * BitriPay payment webhook — activates the member on a VERIFIED payment.
+ * BitriPay payment webhook — the money gate. Activates on a VERIFIED payment
+ * and claws back on a reversal/chargeback.
  *
  * Hardening (financial integrity):
- *  1. FAIL CLOSED — if BITRIPAY_WEBHOOK_SECRET is not set, we refuse to
- *     process (503). No secret ⇒ no free activations.
- *  2. Signature — accepts either an HMAC-SHA256 of the raw body (preferred)
- *     or a shared-secret header, compared in constant time.
- *  3. IDEMPOTENT — every payment is recorded once in processed_payments/{txId}
- *     with an atomic "create if absent" precondition. Replays never re-credit.
- *  4. AMOUNT-VERIFIED GRANT — months + ACUs come from the PAID AMOUNT, never
- *     from client-supplied metadata. A $1 payment can't claim the annual plan.
+ *  1. FAIL CLOSED — no BITRIPAY_WEBHOOK_SECRET ⇒ 503. No ledger ⇒ 503.
+ *  2. HMAC-SHA256 over the RAW body (hex/base64) or a static shared secret,
+ *     always constant-time compared.
+ *  3. IDEMPOTENT — every event id is claimed once (create-if-absent) so
+ *     replays/retries never re-credit or double-clawback.
+ *  4. AMOUNT-VERIFIED GRANT — months + ACUs come from the PAID AMOUNT
+ *     (lib/plans.ts), never from client metadata.
+ *  5. REVERSALS — refund/chargeback/reversed events claw back the granted
+ *     ACUs (clamped ≥ 0) and set the member back to pending_payment.
  *
- * Env: BITRIPAY_WEBHOOK_SECRET, FIREBASE_PROJECT_ID, FIREBASE_API_KEY.
+ * Writes prefer the Admin SDK (service account, bypasses locked rules) and
+ * fall back to REST when no service account is configured (pre-launch).
  */
 
-const FIRESTORE = () =>
+const REST = () =>
   `https://firestore.googleapis.com/v1/projects/${process.env.FIREBASE_PROJECT_ID}/databases/(default)/documents`;
-const firebaseReady = () => Boolean(process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_API_KEY);
+const docName = (coll: string, id: string) =>
+  `projects/${process.env.FIREBASE_PROJECT_ID}/databases/(default)/documents/${coll}/${id}`;
+const restReady = () => Boolean(process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_API_KEY);
+const ledgerReady = () => Boolean(adminDb()) || restReady();
+
+const SUCCESS = ['success', 'successful', 'completed', 'paid'];
+const REVERSAL = ['refunded', 'refund', 'reversed', 'reversal', 'chargeback', 'charge_back', 'disputed'];
 
 function safeEqual(a: string, b: string): boolean {
   const ab = Buffer.from(a);
@@ -30,91 +40,128 @@ function safeEqual(a: string, b: string): boolean {
   return timingSafeEqual(ab, bb);
 }
 
-/** Verify the webhook really came from BitriPay. Returns false to reject. */
 function verifySignature(raw: string, headers: Headers, secret: string): boolean {
-  const sigHeader =
-    headers.get('x-bitripay-signature') ||
-    headers.get('x-webhook-signature') ||
-    '';
-  if (sigHeader) {
-    // Preferred: HMAC-SHA256 over the raw body.
-    const expected = createHmac('sha256', secret).update(raw).digest('hex');
-    const provided = sigHeader.replace(/^sha256=/, '').trim();
-    if (safeEqual(provided, expected)) return true;
-    // Some gateways send base64.
-    const expectedB64 = createHmac('sha256', secret).update(raw).digest('base64');
-    if (safeEqual(provided, expectedB64)) return true;
-    return false;
+  const sig = headers.get('x-bitripay-signature') || headers.get('x-webhook-signature') || '';
+  if (sig) {
+    const provided = sig.replace(/^sha256=/, '').trim();
+    const hex = createHmac('sha256', secret).update(raw).digest('hex');
+    if (safeEqual(provided, hex)) return true;
+    const b64 = createHmac('sha256', secret).update(raw).digest('base64');
+    return safeEqual(provided, b64);
   }
-  // Fallback: static shared-secret header (constant-time compared).
   const shared = headers.get('x-webhook-secret') || '';
   return Boolean(shared) && safeEqual(shared, secret);
 }
 
-/**
- * Atomically claim a payment id. Returns true if THIS call claimed it
- * (first time), false if it was already processed (duplicate/replay).
- */
-async function claimPayment(txId: string): Promise<boolean> {
-  const url = `${FIRESTORE()}:commit?key=${process.env.FIREBASE_API_KEY}`;
-  const res = await fetch(url, {
+/** Atomically claim an event id. true = first time, false = already processed. */
+async function claimEvent(eventId: string): Promise<boolean> {
+  const db = adminDb();
+  if (db) {
+    const ref = db.collection('processed_payments').doc(eventId);
+    return db.runTransaction(async tx => {
+      const snap = await tx.get(ref);
+      if (snap.exists) return false;
+      tx.set(ref, { processedAt: new Date().toISOString() });
+      return true;
+    });
+  }
+  const res = await fetch(`${REST()}:commit?key=${process.env.FIREBASE_API_KEY}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       writes: [
         {
-          update: {
-            name: `projects/${process.env.FIREBASE_PROJECT_ID}/databases/(default)/documents/processed_payments/${txId}`,
-            fields: { processedAt: { stringValue: new Date().toISOString() } },
-          },
+          update: { name: docName('processed_payments', eventId), fields: { processedAt: { stringValue: new Date().toISOString() } } },
           currentDocument: { exists: false },
         },
       ],
     }),
   });
   if (res.ok) return true;
-  if (res.status === 400 || res.status === 409) return false; // already exists → duplicate
-  throw new Error(`claimPayment failed: ${res.status}`);
+  if (res.status === 400 || res.status === 409) return false;
+  throw new Error(`claimEvent failed: ${res.status}`);
 }
 
-async function activateMember(memberId: string, plan: Plan): Promise<boolean> {
+async function setMemberState(
+  memberId: string,
+  state: 'active' | 'pending_payment',
+  plan: Plan | null,
+): Promise<boolean> {
+  const active = state === 'active';
   const paidUntil = new Date();
-  paidUntil.setMonth(paidUntil.getMonth() + plan.months);
-  const url =
-    `${FIRESTORE()}/members/${encodeURIComponent(memberId)}?key=${process.env.FIREBASE_API_KEY}` +
-    `&updateMask.fieldPaths=contributionStatus&updateMask.fieldPaths=status` +
-    `&updateMask.fieldPaths=paidUntil&updateMask.fieldPaths=lastPaymentAt&updateMask.fieldPaths=lastPlan`;
+  if (active && plan) paidUntil.setMonth(paidUntil.getMonth() + plan.months);
+
+  const db = adminDb();
+  if (db) {
+    try {
+      await db.collection('members').doc(memberId).set(
+        {
+          contributionStatus: active ? 'Active' : 'Ineligible',
+          status: state,
+          ...(active && plan ? { paidUntil: paidUntil.toISOString(), lastPaymentAt: new Date().toISOString(), lastPlan: plan.id } : { reversedAt: new Date().toISOString() }),
+        },
+        { merge: true },
+      );
+      return true;
+    } catch (e) {
+      console.error('Member state update failed (admin):', e);
+      return false;
+    }
+  }
+
+  const fields: Record<string, unknown> = {
+    contributionStatus: { stringValue: active ? 'Active' : 'Ineligible' },
+    status: { stringValue: state },
+  };
+  const masks = ['contributionStatus', 'status'];
+  if (active && plan) {
+    fields.paidUntil = { stringValue: paidUntil.toISOString() };
+    fields.lastPaymentAt = { stringValue: new Date().toISOString() };
+    fields.lastPlan = { stringValue: plan.id };
+    masks.push('paidUntil', 'lastPaymentAt', 'lastPlan');
+  } else {
+    fields.reversedAt = { stringValue: new Date().toISOString() };
+    masks.push('reversedAt');
+  }
+  const url = `${REST()}/members/${encodeURIComponent(memberId)}?key=${process.env.FIREBASE_API_KEY}&` +
+    masks.map(m => `updateMask.fieldPaths=${m}`).join('&');
   const res = await fetch(url, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      fields: {
-        contributionStatus: { stringValue: 'Active' },
-        status: { stringValue: 'active' },
-        paidUntil: { stringValue: paidUntil.toISOString() },
-        lastPaymentAt: { stringValue: new Date().toISOString() },
-        lastPlan: { stringValue: plan.id },
-      },
-    }),
+    body: JSON.stringify({ fields }),
   });
   return res.ok;
 }
 
+function resolveMemberId(event: Record<string, unknown>, metadata: Record<string, unknown>): string {
+  const reference = (event.reference as string) || '';
+  return (metadata.memberId as string) || (reference.startsWith('LCD-') ? reference.split('-')[1] : '');
+}
+
+function resolvePlan(event: Record<string, unknown>, metadata: Record<string, unknown>): Plan | null {
+  const paid = Number((event.amount as number) ?? (event.amount_paid as number) ?? (event.paid_amount as number) ?? NaN);
+  const currency = String((event.currency as string) || 'USD').toUpperCase();
+  if (paid && currency !== 'USD') return null;
+  return planForAmount(paid) || getPlan(metadata.plan);
+}
+
+function eventId(event: Record<string, unknown>): string {
+  const raw = String((event.transaction_id as string) || (event.id as string) || (event.reference as string) || '');
+  return encodeURIComponent(raw).replace(/[^A-Za-z0-9_-]/g, '_').slice(0, 200);
+}
+
 export async function POST(req: NextRequest) {
   try {
-    // ── 1. Fail closed: a webhook secret is mandatory ──
     const secret = process.env.BITRIPAY_WEBHOOK_SECRET;
     if (!secret) {
       console.error('Webhook rejected: BITRIPAY_WEBHOOK_SECRET not configured');
       return NextResponse.json({ error: 'Webhook not configured' }, { status: 503 });
     }
-    if (!firebaseReady()) {
-      // Without the ledger we cannot dedupe or credit safely — do not activate.
-      console.error('Webhook rejected: Firebase not configured (needed for idempotency)');
+    if (!ledgerReady()) {
+      console.error('Webhook rejected: no ledger configured (needed for idempotency)');
       return NextResponse.json({ error: 'Ledger not configured' }, { status: 503 });
     }
 
-    // ── 2. Verify signature over the RAW body ──
     const raw = await req.text();
     if (!verifySignature(raw, req.headers, secret)) {
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
@@ -127,73 +174,53 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
     }
 
-    const status = String(
-      (event.status as string) || (event.payment_status as string) || '',
-    ).toLowerCase();
-    if (!['success', 'successful', 'completed', 'paid'].includes(status)) {
+    const status = String((event.status as string) || (event.payment_status as string) || '').toLowerCase();
+    const isSuccess = SUCCESS.includes(status);
+    const isReversal = REVERSAL.includes(status);
+    if (!isSuccess && !isReversal) {
       return NextResponse.json({ received: true, ignored: status });
     }
 
     const metadata = (event.metadata as Record<string, unknown>) || {};
-    const reference = (event.reference as string) || '';
-    const memberId =
-      (metadata.memberId as string) ||
-      (reference.startsWith('LCD-') ? reference.split('-')[1] : '');
+    const memberId = resolveMemberId(event, metadata);
     if (!memberId) {
-      console.error('Webhook success but no memberId:', raw.slice(0, 300));
+      console.error('Webhook missing memberId:', raw.slice(0, 300));
       return NextResponse.json({ error: 'memberId missing' }, { status: 400 });
     }
-
-    // ── 3. Resolve the plan from the VERIFIED paid amount (not metadata) ──
-    const paidAmount = Number(
-      (event.amount as number) ??
-        (event.amount_paid as number) ??
-        (event.paid_amount as number) ??
-        NaN,
-    );
-    const currency = String((event.currency as string) || 'USD').toUpperCase();
-    let plan = planForAmount(paidAmount);
-    if (paidAmount && currency !== 'USD') {
-      // A non-USD amount can't be trusted to map to a USD plan — reject.
-      console.error('Webhook rejected: unexpected currency', currency);
-      return NextResponse.json({ error: 'Unexpected currency' }, { status: 400 });
-    }
-    // If the gateway does not send an amount, fall back to the plan named in
-    // metadata but grant ONLY what that plan is worth (clamped, never trusted
-    // to inflate). If neither is present/valid, reject rather than over-grant.
-    if (!plan) plan = getPlan(metadata.plan);
+    const plan = resolvePlan(event, metadata);
     if (!plan) {
-      console.error('Webhook rejected: could not resolve a valid plan', { paidAmount, meta: metadata.plan });
+      console.error('Webhook unresolvable plan/amount:', raw.slice(0, 200));
       return NextResponse.json({ error: 'Unresolvable plan/amount' }, { status: 400 });
     }
 
-    // ── 4. Idempotency: claim the payment id exactly once ──
-    const rawTxId = String(
-      (event.transaction_id as string) ||
-        (event.id as string) ||
-        (event.reference as string) ||
-        '',
-    );
-    if (!rawTxId) {
-      console.error('Webhook success but no transaction id:', raw.slice(0, 300));
-      return NextResponse.json({ error: 'transaction id missing' }, { status: 400 });
-    }
-    const txId = encodeURIComponent(rawTxId).replace(/[^A-Za-z0-9_-]/g, '_').slice(0, 200);
+    const id = eventId(event);
+    if (!id) return NextResponse.json({ error: 'event id missing' }, { status: 400 });
 
-    const firstTime = await claimPayment(txId);
-    if (!firstTime) {
-      return NextResponse.json({ received: true, duplicate: true, txId });
+    if (isReversal) {
+      // Claim FIRST — clawback is not idempotent, so it must run at most once.
+      const firstTime = await claimEvent(`rev-${id}`);
+      if (!firstTime) return NextResponse.json({ received: true, duplicate: true, id });
+      await setMemberState(memberId, 'pending_payment', null); // idempotent
+      let clawedBack = 0;
+      try {
+        await deductToFloor(memberId, plan.acus);
+        clawedBack = plan.acus;
+      } catch (e) {
+        console.error('ACU clawback failed:', e);
+      }
+      return NextResponse.json({ received: true, reversed: memberId, clawedBack });
     }
 
-    // ── 5. Activate + credit (only reached once per payment) ──
-    const activated = await activateMember(memberId, plan);
+    // Success path: activate FIRST (idempotent set). If it fails we can safely
+    // return 500 for the gateway to retry, because we have not claimed yet.
+    const activated = await setMemberState(memberId, 'active', plan);
     if (!activated) {
       console.error('Member activation failed for', memberId);
-      // Ask the gateway to retry; the tx claim above makes retry safe (the
-      // duplicate branch will short-circuit once activation succeeds).
       return NextResponse.json({ error: 'Activation failed, retry' }, { status: 500 });
     }
-
+    // Then claim — guards the ADDITIVE credit against replays/retries.
+    const firstTime = await claimEvent(`pay-${id}`);
+    if (!firstTime) return NextResponse.json({ received: true, duplicate: true, id });
     let acuCredited = 0;
     try {
       await credit(memberId, plan.acus);
@@ -201,7 +228,6 @@ export async function POST(req: NextRequest) {
     } catch (e) {
       console.error('ACU credit failed (payment recorded):', e);
     }
-
     return NextResponse.json({ received: true, memberActivated: memberId, plan: plan.id, acuCredited });
   } catch (error) {
     console.error('Webhook error:', error);

@@ -36,6 +36,9 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false, // hide X-Powered-By
+  // firebase-admin uses Node built-ins/native deps — keep it out of the
+  // bundle so it runs correctly in the serverless function.
+  experimental: { serverComponentsExternalPackages: ['firebase-admin'] },
   images: {
     remotePatterns: [
       {

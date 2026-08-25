@@ -26,6 +26,9 @@ export const ACU_GRANTS: Record<string, number> = {
   annual: 80,
 };
 
+import { adminDb } from './firebaseAdmin';
+import { FieldValue } from 'firebase-admin/firestore';
+
 const PROJECT = () => process.env.FIREBASE_PROJECT_ID;
 const KEY = () => process.env.FIREBASE_API_KEY;
 const BASE = () => `https://firestore.googleapis.com/v1/projects/${PROJECT()}/databases/(default)/documents`;
@@ -38,11 +41,16 @@ function docUrl(memberId: string): string {
 }
 
 export function ledgerConfigured(): boolean {
-  return Boolean(PROJECT() && KEY());
+  return Boolean(adminDb()) || Boolean(PROJECT() && KEY());
 }
 
 /** Read balance only (no concurrency token). */
 export async function getBalance(memberId: string): Promise<number> {
+  const db = adminDb();
+  if (db) {
+    const snap = await db.collection('acu_accounts').doc(memberId).get();
+    return snap.exists ? Number(snap.get('balance') || 0) : 0;
+  }
   if (!ledgerConfigured()) return 0;
   const res = await fetch(docUrl(memberId), { cache: 'no-store' });
   if (res.status === 404) return 0;
@@ -111,6 +119,26 @@ export async function debit(
   memberId: string,
   cost: number,
 ): Promise<{ ok: true; remaining: number } | { ok: false; reason: 'insufficient' | 'no_ledger'; balance: number }> {
+  // Preferred: real Firestore transaction (service account, bypasses rules).
+  const db = adminDb();
+  if (db) {
+    const ref = db.collection('acu_accounts').doc(memberId);
+    try {
+      return await db.runTransaction(async tx => {
+        const snap = await tx.get(ref);
+        const balance = snap.exists ? Number(snap.get('balance') || 0) : 0;
+        if (balance < cost) {
+          return { ok: false as const, reason: 'insufficient' as const, balance };
+        }
+        tx.set(ref, { balance: balance - cost, updatedAt: new Date().toISOString() }, { merge: true });
+        return { ok: true as const, remaining: balance - cost };
+      });
+    } catch (e) {
+      console.error('ACU debit transaction failed:', e);
+      return { ok: false, reason: 'insufficient', balance: await getBalance(memberId) };
+    }
+  }
+
   if (!ledgerConfigured()) return { ok: false, reason: 'no_ledger', balance: 0 };
 
   for (let attempt = 0; attempt < 6; attempt++) {
@@ -132,9 +160,17 @@ export async function debit(
  * Called by the payment webhook after a verified, de-duplicated payment.
  */
 export async function credit(memberId: string, amount: number): Promise<void> {
-  if (!ledgerConfigured()) throw new Error('ACU ledger not configured');
   const inc = Math.trunc(amount);
   if (inc === 0) return;
+  const db = adminDb();
+  if (db) {
+    await db
+      .collection('acu_accounts')
+      .doc(memberId)
+      .set({ balance: FieldValue.increment(inc), updatedAt: new Date().toISOString() }, { merge: true });
+    return;
+  }
+  if (!ledgerConfigured()) throw new Error('ACU ledger not configured');
   const res = await fetch(`${BASE()}:commit?key=${KEY()}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -164,4 +200,34 @@ export async function refund(memberId: string, amount: number): Promise<void> {
   } catch (e) {
     console.error('ACU refund failed:', e);
   }
+}
+
+/**
+ * Remove up to `amount` ACUs, clamped at zero (never negative). Used when a
+ * payment is reversed/charged back — we claw back the granted ACUs so a
+ * reversed payment can't leave the member with free AI credit.
+ * Returns the new balance.
+ */
+export async function deductToFloor(memberId: string, amount: number): Promise<number> {
+  const take = Math.trunc(amount);
+  if (take <= 0) return getBalance(memberId);
+  const db = adminDb();
+  if (db) {
+    const ref = db.collection('acu_accounts').doc(memberId);
+    return db.runTransaction(async tx => {
+      const snap = await tx.get(ref);
+      const balance = snap.exists ? Number(snap.get('balance') || 0) : 0;
+      const next = Math.max(0, balance - take);
+      tx.set(ref, { balance: next, updatedAt: new Date().toISOString() }, { merge: true });
+      return next;
+    });
+  }
+  if (!ledgerConfigured()) return 0;
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const { balance, updateTime, exists } = await readBalanceWithToken(memberId);
+    const next = Math.max(0, balance - take);
+    const precondition = exists && updateTime ? { updateTime } : ({ exists: false } as const);
+    if (await commitBalance(memberId, next, precondition)) return next;
+  }
+  return getBalance(memberId);
 }

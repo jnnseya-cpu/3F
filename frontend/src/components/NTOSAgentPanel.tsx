@@ -10,6 +10,9 @@ import Link from 'next/link';
 function getMemberId(): string | null {
   try { return localStorage.getItem('lcd_member_id'); } catch { return null; }
 }
+function getMemberToken(): string {
+  try { return localStorage.getItem('lcd_member_token') || ''; } catch { return ''; }
+}
 
 interface Message {
   role: 'user' | 'assistant';
@@ -65,7 +68,7 @@ export default function NTOSAgentPanel({
     try {
       const res = await humanFetch('/api/agents/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-member-token': getMemberToken() },
         body: JSON.stringify({ agentName: `SNTO-${agentId}`, message: content, memberId: getMemberId() }),
       });
 

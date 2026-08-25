@@ -10,6 +10,9 @@ import { getGrowthTool } from '@/lib/growthTools';
 function getMemberId(): string | null {
   try { return localStorage.getItem('lcd_member_id'); } catch { return null; }
 }
+function getMemberToken(): string {
+  try { return localStorage.getItem('lcd_member_token') || ''; } catch { return ''; }
+}
 
 export default function GrowthToolPanel({ toolId }: { toolId: string }) {
   const tool = getGrowthTool(toolId);
@@ -35,7 +38,7 @@ export default function GrowthToolPanel({ toolId }: { toolId: string }) {
     try {
       const res = await humanFetch('/api/growth/generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-member-token': getMemberToken() },
         body: JSON.stringify({ toolId, inputs, memberId: getMemberId() }),
       });
       if (res.ok) {

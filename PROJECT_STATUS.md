@@ -68,7 +68,9 @@ Referral: `/invite` · Security: `/security`
 | Variable | Unlocks |
 |---|---|
 | `ANTHROPIC_API_KEY` (+ `OPENAI_API_KEY`, `GEMINI_API_KEY`) | Real AI on all agents/tools |
-| `FIREBASE_PROJECT_ID` + `FIREBASE_API_KEY` | Member records, ACU ledger, referrals persist |
+| `FIREBASE_PROJECT_ID` + `FIREBASE_API_KEY` | Member records, ACU ledger, referrals persist (REST fallback) |
+| `FIREBASE_CLIENT_EMAIL` + `FIREBASE_PRIVATE_KEY` (or `FIREBASE_SERVICE_ACCOUNT`) | **Admin SDK** — privileged server writer; required to deploy locked `firestore.rules` |
+| `MEMBER_TOKEN_SECRET` | Turns on signed member-token auth for AI/ACU spend |
 | `BITRIPAY_API_KEY` + `BITRIPAY_API_URL` + `BITRIPAY_WEBHOOK_SECRET` | Real payments → bank |
 | `HUMAN_GATE_SECRET`, `SENTINEL_ADMIN_KEY`, `CRON_SECRET` | Security hardening |
 | `RESEND_API_KEY` (+ `NEWSLETTER_FROM`, `NEWSLETTER_SECRET`) | Weekly newsletter delivery |
@@ -107,11 +109,42 @@ The money path is: BitriPay checkout → webhook → member activation + ACU cre
 - **Failed AI actions are refunded.** chat/growth/autopilot credit the ACU back when every provider is down, so members are never charged for nothing (removes a refund/chargeback surface).
 - **Cron endpoints fail closed.** No `CRON_SECRET` ⇒ 503 on `/api/seo/autopilot` (AI spend) and `/api/newsletter/send` (mass email), so neither is publicly triggerable.
 
-### Remaining money-path gaps to close before launch (documented, not yet fixed)
-- **`memberId` is an unauthenticated bearer.** Any caller who knows a member's Firestore id can spend that member's ACUs (griefing) — no financial gain to the attacker, but real ACU loss. Real fix arrives with Firebase Auth (currently dormant): bind AI/ACU calls to an authenticated session, not a body field.
-- **Referral counter (`/api/referral/track`) is inflatable.** Public, self-referral-capable, no dedupe. Harmless while referrals pay nothing — but **any future referral reward must be derived server-side from actual paid conversions** (a referred member whose webhook fired), never from this counter. Do not attach ACU/cash rewards to it as-is.
-- **Rate limiting is per-instance in-memory** (`lib/rateLimit.ts`) — weak across serverless instances. For money endpoints (checkout/webhook) move to a shared store (Firestore/Upstash) before high traffic.
-- **Chargebacks/reversals** (mobile-money reversal after ACUs are spent) are not handled — add a webhook branch on refund/chargeback events to deduct remaining ACUs and set membership back to `pending_payment`.
+### The real seal — Admin SDK + locked Firestore rules
+The server previously wrote to Firestore with the Web API key, which Firestore
+treats as an **unauthenticated client** — so no rule could tell our server from
+an attacker holding that key. Fixed by adding the **Firebase Admin SDK**
+(`lib/firebaseAdmin.ts`, service account) as the privileged writer:
+- `acu.ts` (balance/debit/credit/refund/clawback), the payment webhook,
+  registration, blog views, and referral tracking now **prefer the Admin SDK**
+  and fall back to REST only when no service account is set (pre-launch).
+- ACU debit under Admin uses a **real Firestore transaction** (not just CAS).
+- **`firestore.rules`** (repo root) denies ALL client access to money data
+  (`acu_accounts`, `processed_payments`, `members`, `newsletter_log`) and makes
+  `referrals`/`blog_views`/`blog` read-only to clients. The Admin SDK bypasses
+  these rules; attackers with the API key are locked out.
+- **Chargebacks/reversals handled:** refund/chargeback/reversed webhook events
+  claw back the granted ACUs (clamped ≥ 0) and set the member back to
+  `pending_payment` — idempotently.
+- **`memberId` bearer closed:** registration issues a signed HMAC member token
+  (`lib/memberAuth.ts`); chat/growth require `x-member-token` before debiting.
+  Enforced when `MEMBER_TOKEN_SECRET` is set. Client stores it at registration
+  and sends it from all three AI panels.
+- **Registration field-injection closed:** the register route whitelists client
+  fields (no `...body` spread) so a client can't inject `paidUntil`/`status` to
+  self-activate.
+
+**GO-LIVE (do together): 1)** set `FIREBASE_CLIENT_EMAIL` + `FIREBASE_PRIVATE_KEY`
+(or `FIREBASE_SERVICE_ACCOUNT`) and `MEMBER_TOKEN_SECRET` in Vercel; **2)** deploy
+`firestore.rules`. Until the service account is set, keep Firestore in test mode
+(the REST fallback needs read/write).
+
+### Still open (lower priority)
+- **Rate limiting is per-instance in-memory** (`lib/rateLimit.ts`) — weak across
+  serverless instances. Move money endpoints to a shared store (Firestore/Upstash)
+  before high traffic.
+- **Referral rewards**: the counter is still not authoritative — if rewards are
+  ever attached, derive them server-side from real paid conversions, never from
+  `/api/referral/track`.
 
 ## Audit log
 - **Day-20 deep audit** (this pass): cleared all retired green-brand color

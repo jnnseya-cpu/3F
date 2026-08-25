@@ -1,0 +1,70 @@
+rules_version = '2';
+
+// ============================================================================
+// Le Congo D'Abord — Firestore security rules (financial seal)
+//
+// WHY THIS MATTERS: the app's REST path authenticates with the Web API key,
+// which Firestore treats as an UNAUTHENTICATED CLIENT. These rules therefore
+// cannot tell "our server" from "any attacker with the key". The seal is:
+//   1. The server writes money data with the Firebase ADMIN SDK (service
+//      account) — which BYPASSES these rules entirely.
+//   2. These rules DENY all client access to money data.
+//
+// GO-LIVE ORDER (do both together, or you break the app):
+//   a) Set FIREBASE_CLIENT_EMAIL + FIREBASE_PRIVATE_KEY (or
+//      FIREBASE_SERVICE_ACCOUNT) in Vercel so acu.ts / webhook / register use
+//      the Admin SDK.
+//   b) Deploy these rules.
+// Until (a) is done, keep Firestore in test mode — the REST fallback needs
+// read/write and locked rules would block it.
+// ============================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- MONEY DATA: server-only (Admin SDK). No client access ever. ---
+    match /acu_accounts/{id} {
+      allow read, write: if false;
+    }
+    match /processed_payments/{id} {
+      allow read, write: if false;
+    }
+
+    // --- MEMBERS: created + activated only by the server (Admin SDK). ---
+    // No client reads (contains PII), no client writes (would allow
+    // self-activation / fake paidUntil). Registration goes through Admin SDK.
+    match /members/{id} {
+      allow read, write: if false;
+    }
+
+    // --- NEWSLETTER LOG: server-only idempotency markers. ---
+    match /newsletter_log/{id} {
+      allow read, write: if false;
+    }
+
+    // --- REFERRALS: read-only leaderboard; writes server-only. ---
+    // NOTE: referral counts are NOT authoritative for any payout. Rewards, if
+    // ever added, must be derived server-side from real paid conversions.
+    match /referrals/{code} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // --- BLOG VIEW COUNTS: public read; increments only via the server. ---
+    match /blog_views/{slug} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // --- AI-GENERATED BLOG ARTICLES (autopilot): public read, server write. ---
+    match /blog/{slug} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Default deny for anything not explicitly listed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

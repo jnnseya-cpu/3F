@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
+import { adminDb } from '@/lib/firebaseAdmin';
+import { FieldValue } from 'firebase-admin/firestore';
 
 /**
  * Blog post view counter.
@@ -15,11 +17,16 @@ import { rateLimit, clientIp } from '@/lib/rateLimit';
 const PROJECT = () => process.env.FIREBASE_PROJECT_ID;
 const KEY = () => process.env.FIREBASE_API_KEY;
 const DB = () => `projects/${PROJECT()}/databases/(default)/documents`;
-const configured = () => Boolean(PROJECT() && KEY());
+const configured = () => Boolean(adminDb()) || Boolean(PROJECT() && KEY());
 
 const SLUG_RE = /^[a-z0-9-]{1,80}$/;
 
 async function readCount(slug: string): Promise<number> {
+  const db = adminDb();
+  if (db) {
+    const snap = await db.collection('blog_views').doc(slug).get();
+    return snap.exists ? Number(snap.get('count') || 0) : 0;
+  }
   const url = `https://firestore.googleapis.com/v1/${DB()}/blog_views/${encodeURIComponent(slug)}?key=${KEY()}`;
   const res = await fetch(url, { cache: 'no-store' });
   if (res.status === 404) return 0;
@@ -30,6 +37,13 @@ async function readCount(slug: string): Promise<number> {
 
 /** Atomic upsert-and-increment via the commit API's field transform. */
 async function incrementCount(slug: string): Promise<number> {
+  const db = adminDb();
+  if (db) {
+    const ref = db.collection('blog_views').doc(slug);
+    await ref.set({ count: FieldValue.increment(1), updatedAt: new Date().toISOString() }, { merge: true });
+    const snap = await ref.get();
+    return Number(snap.get('count') || 0);
+  }
   const url = `https://firestore.googleapis.com/v1/${DB()}:commit?key=${KEY()}`;
   const res = await fetch(url, {
     method: 'POST',

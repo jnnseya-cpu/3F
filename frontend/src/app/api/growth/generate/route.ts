@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
 import { humanGuard } from '@/lib/guard';
 import { debit, refund, ACU_COSTS } from '@/lib/acu';
+import { verifyMemberToken } from '@/lib/memberAuth';
 
 /**
  * AI Growth Engine — generation endpoint.
@@ -84,7 +85,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const guard = humanGuard(req, body);
     if (guard) return guard;
-    const { toolId, inputs, memberId } = body;
+    const { toolId, inputs, memberId, memberToken } = body;
     const promptBuilder = TOOL_PROMPTS[toolId];
     if (!promptBuilder || typeof inputs !== 'object') {
       return NextResponse.json({ error: 'toolId invalide' }, { status: 400 });
@@ -95,6 +96,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'ACU_REQUIRED', message: 'Compte membre requis — les outils IA consomment des ACUs.' },
         { status: 402 },
+      );
+    }
+    if (!verifyMemberToken(memberId, req.headers.get('x-member-token') || memberToken)) {
+      return NextResponse.json(
+        { error: 'MEMBER_AUTH_REQUIRED', message: 'Session membre invalide — reconnectez-vous.' },
+        { status: 401 },
       );
     }
     const charge = await debit(memberId, ACU_COSTS.growth);

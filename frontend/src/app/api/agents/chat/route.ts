@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
 import { humanGuard } from '@/lib/guard';
 import { debit, refund, ACU_COSTS } from '@/lib/acu';
+import { verifyMemberToken } from '@/lib/memberAuth';
 
 /**
  * AI Agent chat — multi-provider router with automatic fallback.
@@ -101,7 +102,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const guard = humanGuard(req, body);
     if (guard) return guard;
-    const { agentName, message, memberId } = body;
+    const { agentName, message, memberId, memberToken } = body;
     if (!message || typeof message !== 'string' || message.length > 4000) {
       return NextResponse.json({ error: 'Invalid message' }, { status: 400 });
     }
@@ -111,6 +112,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'ACU_REQUIRED', message: 'Compte membre requis — les actions IA consomment des ACUs.' },
         { status: 402 },
+      );
+    }
+    // Bind the spend to a server-issued token (when enforcement is on)
+    if (!verifyMemberToken(memberId, req.headers.get('x-member-token') || memberToken)) {
+      return NextResponse.json(
+        { error: 'MEMBER_AUTH_REQUIRED', message: 'Session membre invalide — reconnectez-vous.' },
+        { status: 401 },
       );
     }
     const charge = await debit(memberId, ACU_COSTS.chat);
