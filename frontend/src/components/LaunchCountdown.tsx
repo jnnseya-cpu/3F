@@ -2,15 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { Rocket } from 'lucide-react';
+import { LAUNCH_MS, LAUNCH_LABEL_FR, LAUNCH_CONTEXT_FR } from '@/lib/launch';
 
 /**
- * Countdown to the national launch — 4 January 2027, 00:00 Kinshasa time
- * (UTC+1), the Journée des Martyrs. Renders a stable placeholder on the
- * server and hydrates the live timer on the client (no hydration mismatch).
+ * Countdown to the national launch (see lib/launch.ts for the date). Renders a
+ * stable placeholder on the server and hydrates the live timer on the client
+ * (no hydration mismatch).
  */
-
-// 2027-01-04T00:00:00 at UTC+1 == 2027-01-03T23:00:00Z
-const LAUNCH_MS = Date.UTC(2027, 0, 3, 23, 0, 0);
 
 interface Parts { days: number; hours: number; minutes: number; seconds: number; }
 
@@ -49,7 +47,7 @@ export default function LaunchCountdown() {
     <div className="mt-8 inline-flex flex-col gap-2">
       <span className="inline-flex items-center gap-2 text-drc-yellow text-xs font-bold uppercase tracking-widest">
         <Rocket className="w-4 h-4" />
-        {launched ? 'Lancement national — nous y sommes' : 'Lancement national — 4 janvier 2027'}
+        {launched ? 'Lancement national — nous y sommes' : `Lancement national — ${LAUNCH_LABEL_FR}`}
       </span>
       <div className="flex gap-2 sm:gap-3" aria-live="polite">
         {cells.map(([value, label], i) => (
@@ -66,7 +64,7 @@ export default function LaunchCountdown() {
           </div>
         ))}
       </div>
-      <span className="text-blue-200 text-xs">Journée des Martyrs · heure de Kinshasa</span>
+      <span className="text-blue-200 text-xs">{LAUNCH_CONTEXT_FR}</span>
     </div>
   );
 }

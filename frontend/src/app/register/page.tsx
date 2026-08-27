@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { humanFetch } from '@/lib/humanClient';
 import { trackRegistration } from '@/lib/analytics';
-import { CheckCircle, User, MapPin, BookOpen, Briefcase, Star, DollarSign, ChevronRight, ChevronLeft, AlertCircle } from 'lucide-react';
+import { CheckCircle, User, MapPin, BookOpen, Briefcase, Star, DollarSign, ChevronRight, ChevronLeft, AlertCircle, Rocket } from 'lucide-react';
+import { LAUNCH_LABEL_FR } from '@/lib/launch';
 import { DRC_PROVINCES, CONTINENTS, AFRICAN_COUNTRIES } from '@/lib/provinces';
 
 type Step = 1 | 2 | 3 | 4 | 5 | 6;
@@ -234,6 +235,9 @@ export default function RegisterPage() {
         <div className="max-w-4xl mx-auto px-4 pt-8 text-center">
           <h1 className="text-3xl font-black mb-2">Inscription — Le Congo D'Abord</h1>
           <p className="text-blue-200">Rejoignez le mouvement citoyen pour un Congo meilleur</p>
+          <p className="mt-3 inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-sm text-drc-yellow font-semibold">
+            <Rocket className="w-4 h-4" /> Lancement national le {LAUNCH_LABEL_FR} — inscrivez-vous avant le grand jour
+          </p>
         </div>
       </div>
 

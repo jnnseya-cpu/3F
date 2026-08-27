@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import PageViewTracker from '@/components/PageViewTracker';
 import type { Language } from '@/lib/translations';
+import { LAUNCH_LABEL_FR } from '@/lib/launch';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [language, setLanguage] = useState<Language>('fr');
@@ -35,7 +36,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <p className="text-blue-300 text-sm mt-1">Kinshasa, RD Congo</p>
           </div>
         </div>
-        <div className="border-t border-drc-blue-dark text-center py-4 text-blue-300 text-xs">
+        <div className="border-t border-white/10 text-center py-4 text-blue-300 text-xs">
+          <p className="text-drc-yellow font-semibold mb-1">Lancement national — {LAUNCH_LABEL_FR}</p>
           © 2025 Le Congo D&apos;Abord. Tous droits réservés.
         </div>
       </footer>
