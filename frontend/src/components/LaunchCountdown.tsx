@@ -1,16 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { Rocket } from 'lucide-react';
 import { LAUNCH_MS, LAUNCH_LABEL_FR, LAUNCH_CONTEXT_FR } from '@/lib/launch';
 
 /**
  * Live countdown to the national launch (see lib/launch.ts for the date).
- * Renders the real remaining time on the very first paint — server and client
- * both compute from LAUNCH_MS, and the per-second numbers carry
- * suppressHydrationWarning so the unavoidable sub-second server/client delta
- * never produces a mismatch warning. No placeholder dashes.
+ * The exact remaining time is written BEFORE the first browser paint (via a
+ * layout effect), so the viewer never sees a stale or placeholder value — only
+ * real, ticking numbers. suppressHydrationWarning covers the sub-second delta
+ * between the server-rendered HTML and the client's first computed value.
  */
+
+// Runs before paint on the client, falls back to a no-op effect on the server.
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 interface Parts { days: number; hours: number; minutes: number; seconds: number; }
 
@@ -31,7 +34,9 @@ export default function LaunchCountdown() {
   const [t, setT] = useState<Parts>(() => remaining());
   const [launched, setLaunched] = useState<boolean>(() => LAUNCH_MS - Date.now() <= 0);
 
-  useEffect(() => {
+  // Correct to the exact current value before the browser paints (no stale
+  // frame), then keep ticking every second.
+  useIsomorphicLayoutEffect(() => {
     const tick = () => {
       setT(remaining());
       setLaunched(LAUNCH_MS - Date.now() <= 0);
