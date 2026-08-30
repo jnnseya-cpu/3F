@@ -5,9 +5,11 @@ import { Rocket } from 'lucide-react';
 import { LAUNCH_MS, LAUNCH_LABEL_FR, LAUNCH_CONTEXT_FR } from '@/lib/launch';
 
 /**
- * Countdown to the national launch (see lib/launch.ts for the date). Renders a
- * stable placeholder on the server and hydrates the live timer on the client
- * (no hydration mismatch).
+ * Live countdown to the national launch (see lib/launch.ts for the date).
+ * Renders the real remaining time on the very first paint — server and client
+ * both compute from LAUNCH_MS, and the per-second numbers carry
+ * suppressHydrationWarning so the unavoidable sub-second server/client delta
+ * never produces a mismatch warning. No placeholder dashes.
  */
 
 interface Parts { days: number; hours: number; minutes: number; seconds: number; }
@@ -24,17 +26,20 @@ function remaining(): Parts {
 }
 
 export default function LaunchCountdown() {
-  const [mounted, setMounted] = useState(false);
-  const [t, setT] = useState<Parts>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  // Compute the real value immediately (runs on server render AND first client
+  // render) so the numbers are correct on first paint — no "--" flash.
+  const [t, setT] = useState<Parts>(() => remaining());
+  const [launched, setLaunched] = useState<boolean>(() => LAUNCH_MS - Date.now() <= 0);
 
   useEffect(() => {
-    setMounted(true);
-    setT(remaining());
-    const id = setInterval(() => setT(remaining()), 1000);
+    const tick = () => {
+      setT(remaining());
+      setLaunched(LAUNCH_MS - Date.now() <= 0);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, []);
-
-  const launched = mounted && LAUNCH_MS - Date.now() <= 0;
 
   const cells: Array<[number, string]> = [
     [t.days, 'jours'],
@@ -50,17 +55,18 @@ export default function LaunchCountdown() {
         {launched ? 'Lancement national — nous y sommes' : `Lancement national — ${LAUNCH_LABEL_FR}`}
       </span>
       <div className="flex gap-2 sm:gap-3" aria-live="polite">
-        {cells.map(([value, label], i) => (
+        {cells.map(([value, label]) => (
           <div
             key={label}
             className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-3 sm:px-4 py-2 min-w-[64px] text-center"
           >
-            <span className="block text-2xl sm:text-3xl font-black text-white tabular-nums">
-              {mounted ? String(value).padStart(2, '0') : '--'}
+            <span
+              className="block text-2xl sm:text-3xl font-black text-white tabular-nums"
+              suppressHydrationWarning
+            >
+              {String(value).padStart(2, '0')}
             </span>
             <span className="block text-[10px] uppercase tracking-wider text-blue-200">{label}</span>
-            {/* subtle separator dot except after the last cell */}
-            {i < cells.length - 1 && <span className="sr-only">:</span>}
           </div>
         ))}
       </div>
