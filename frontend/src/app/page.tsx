@@ -61,33 +61,39 @@ export default function LandingPage() {
         <div className="absolute inset-0" style={{
           background: '#007FFF',
         }}>
-          {/* Red diagonal stripe with yellow borders — actual DRC flag */}
+          {/* Depth wash */}
+          <div className="absolute inset-0" style={{background: 'radial-gradient(1100px 520px at 82% -10%, rgba(51,153,255,0.55), transparent 60%), linear-gradient(135deg, #0a6ae6 0%, #0055CC 55%, #002f77 100%)'}} />
+          {/* Red diagonal stripe with yellow borders — actual DRC flag, kept as a
+              subtle crisp accent (not muddied by an overlay on top of it) */}
           <div className="absolute inset-0" style={{
             background: `
               linear-gradient(
                 -55deg,
                 transparent 0%,
-                transparent calc(50% - 80px),
-                #FCD116 calc(50% - 80px),
-                #FCD116 calc(50% - 65px),
-                #CE1126 calc(50% - 65px),
-                #CE1126 calc(50% + 65px),
-                #FCD116 calc(50% + 65px),
-                #FCD116 calc(50% + 80px),
-                transparent calc(50% + 80px),
+                transparent calc(50% - 78px),
+                rgba(252,209,22,0.85) calc(50% - 78px),
+                rgba(252,209,22,0.85) calc(50% - 64px),
+                rgba(206,17,38,0.85) calc(50% - 64px),
+                rgba(206,17,38,0.85) calc(50% + 64px),
+                rgba(252,209,22,0.85) calc(50% + 64px),
+                rgba(252,209,22,0.85) calc(50% + 78px),
+                transparent calc(50% + 78px),
                 transparent 100%
               )
             `,
-            opacity: 0.9,
+            opacity: 0.5,
+            mixBlendMode: 'soft-light',
           }} />
           {/* Yellow star top-left */}
-          <div className="absolute top-8 left-8 text-drc-yellow" style={{fontSize: '4rem', lineHeight: 1, opacity: 0.9}}>★</div>
-          {/* Subtle overlay for text readability */}
-          <div className="absolute inset-0" style={{background: 'linear-gradient(135deg, rgba(0,85,204,0.55) 0%, rgba(0,0,80,0.35) 100%)'}} />
+          <div className="absolute top-8 left-8 text-drc-yellow" style={{fontSize: '4rem', lineHeight: 1, opacity: 0.55, filter: 'drop-shadow(0 4px 10px rgba(0,0,0,0.25))'}}>★</div>
+          {/* Left-side darkening for crisp text contrast */}
+          <div className="absolute inset-0" style={{background: 'linear-gradient(90deg, rgba(0,25,70,0.55) 0%, rgba(0,25,70,0.20) 45%, transparent 75%)'}} />
+          {/* Fine grain to kill flat banding (premium, non-AI look) */}
+          <div className="absolute inset-0 opacity-[0.06]" style={{backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")"}} />
         </div>
 
         <div className="max-w-7xl mx-auto px-4 py-20 md:py-28 relative z-10">
-          <div className="max-w-4xl">
+          <div className="max-w-4xl animate-fade-up">
             {/* Party badge */}
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-6">
               <Shield className="w-4 h-4 text-drc-yellow" />
@@ -138,17 +144,17 @@ export default function LandingPage() {
         </div>
 
         {/* Stats bar */}
-        <div className="bg-black/20 backdrop-blur-sm border-t border-white/10">
-          <div className="max-w-7xl mx-auto px-4 py-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-black/25 backdrop-blur-md border-t border-white/10">
+          <div className="max-w-7xl mx-auto px-4 py-5 grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               { label: 'Provinces couvertes', value: '26/26' },
               { label: 'Langues nationales', value: '5' },
               { label: 'Agents IA actifs', value: '23' },
               { label: 'Niveaux de structure', value: '7' },
-            ].map(stat => (
-              <div key={stat.label} className="text-center">
-                <p className="text-2xl font-black text-drc-yellow">{stat.value}</p>
-                <p className="text-blue-200 text-xs">{stat.label}</p>
+            ].map((stat, i) => (
+              <div key={stat.label} className={`text-center px-3 py-1 ${i > 0 ? 'md:border-l md:border-white/10' : ''}`}>
+                <p className="font-display text-3xl font-extrabold text-drc-yellow tracking-tight tabular-nums">{stat.value}</p>
+                <p className="text-blue-200/90 text-xs mt-0.5 tracking-wide">{stat.label}</p>
               </div>
             ))}
           </div>

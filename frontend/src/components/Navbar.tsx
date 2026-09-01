@@ -35,18 +35,19 @@ export default function Navbar({ language, setLanguage }: NavbarProps) {
   ];
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+    <nav className="sticky top-0 z-50 border-b border-black/5 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/70 shadow-xs">
       <div className="flag-stripe" />
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-9 h-9 bg-drc-blue rounded-lg flex items-center justify-center shadow">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105"
+                 style={{ backgroundImage: 'linear-gradient(145deg, #1f8bff, #0055CC)', boxShadow: '0 6px 14px -4px rgba(0,85,204,0.5)' }}>
               <Shield className="w-5 h-5 text-drc-yellow" />
             </div>
             <div className="hidden sm:block">
-              <span className="font-black text-drc-blue text-lg leading-none block">Le Congo D’Abord</span>
-              <span className="text-xs text-gray-500 font-medium leading-none">Le Congo D'Abord</span>
+              <span className="font-display font-extrabold text-drc-blue-dark text-lg leading-none block tracking-tight">Le Congo D’Abord</span>
+              <span className="text-[11px] text-ink-500 font-medium leading-none tracking-wide" style={{ color: 'var(--ink-500)' }}>La compétence avant les promesses</span>
             </div>
           </Link>
 

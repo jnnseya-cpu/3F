@@ -58,6 +58,22 @@ Referral: `/invite` · Security: `/security`
 | Analytics | Meta Pixel + Google tag fired site-wide via one shared tracker: page_view on every route + conversion events (registration, AI chat, growth tools, referral share); env-gated, no-op when unset; CSP allowlisted | `lib/analytics.ts`, `components/AnalyticsScripts.tsx`, `components/PageViewTracker.tsx` |
 | PWA + splash | Installable web app manifest (Android/Chrome auto-splash: blue bg + star icon) + 9 iOS apple-touch-startup-image splash screens + maskable/apple icons | `app/manifest.ts`, `layout.tsx` (appleWebApp/viewport), `public/*.png` |
 
+## Design language (premium foundation — applies to ALL pages)
+A single design foundation in `globals.css` + `tailwind.config.ts` gives every
+page a premium, non-template feel — change it there, not per page:
+- **Type**: body Inter, headings **Sora** (`font-display`), tightened tracking,
+  antialiased + `font-feature-settings`. Headings use `color: inherit` (never
+  hard-set — so white-on-blue headers stay white).
+- **Depth**: layered soft shadow tokens (`--shadow-xs…xl`, `shadow-soft*`
+  utilities) instead of flat drops; refined 1px hairline borders; 2xl radii.
+- **Surface**: off-white body with a faint dual radial wash; `.surface`,
+  `.surface-lg`, `.glass`, `.hairline` helpers.
+- **Buttons**: gradient fills with inset highlight + colored shadow, hover lift.
+- **Chrome**: frosted sticky glass navbar; richer gradient footer with launch pill.
+- **Hero**: deep-blue gradient with the DRC flag diagonal as a soft-light tonal
+  accent (not a muddy overlay) + fine SVG grain; `animate-fade-up` entrance.
+Verified via Playwright screenshots (landing, register, blog, dashboard).
+
 ## Design invariants (do not change without a reason)
 - Party name is exactly **"Le Congo D'Abord"** everywhere.
 - DRC flag colors: blue `#007FFF`, yellow `#FCD116`, red `#CE1126`.
