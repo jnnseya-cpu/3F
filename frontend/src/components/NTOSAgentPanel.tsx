@@ -94,19 +94,20 @@ export default function NTOSAgentPanel({
   };
 
   return (
-    <div className="flex flex-col h-[600px] bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+    <div className="flex flex-col h-[600px] bg-white rounded-2xl border border-black/5 shadow-soft-lg overflow-hidden">
       {/* Header */}
-      <div className="bg-drc-blue px-5 py-4 flex items-center gap-3">
-        <div className="w-10 h-10 bg-drc-yellow rounded-xl flex items-center justify-center shrink-0">
+      <div className="hero-gradient px-5 py-4 flex items-center gap-3 relative">
+        <div className="w-10 h-10 bg-drc-yellow rounded-xl flex items-center justify-center shrink-0 shadow-md">
           <Bot className="w-5 h-5 text-drc-blue-dark" />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-white font-black text-sm leading-tight">{agentName}</h3>
+          <h3 className="text-white font-display font-extrabold text-sm leading-tight tracking-tight">{agentName}</h3>
           <p className="text-drc-yellow text-xs font-semibold">{agentSubtitle}</p>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5 glass px-2.5 py-1 rounded-full">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
           <Sparkles className="w-3 h-3 text-drc-yellow" />
-          <span className="text-drc-yellow text-xs font-bold">SNTO</span>
+          <span className="text-white text-[11px] font-bold tracking-wide">SNTO</span>
         </div>
       </div>
 
@@ -139,11 +140,12 @@ export default function NTOSAgentPanel({
                 ? <User className="w-4 h-4 text-white" />
                 : <Bot className="w-4 h-4 text-drc-blue-dark" />}
             </div>
-            <div className={`max-w-[82%] rounded-xl px-4 py-2.5 text-sm ${
+            <div className={`max-w-[82%] rounded-2xl px-4 py-2.5 text-sm shadow-xs ${
               msg.role === 'user'
-                ? 'bg-drc-blue text-white rounded-tr-none'
-                : 'bg-gray-100 text-gray-800 rounded-tl-none'
-            }`}>
+                ? 'text-white rounded-tr-sm'
+                : 'bg-gray-50 text-gray-800 rounded-tl-sm border border-black/5'
+            }`}
+            style={msg.role === 'user' ? { backgroundImage: 'linear-gradient(180deg, #1f8bff, #0055CC)' } : undefined}>
               <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
               <p className={`text-xs mt-1 ${msg.role === 'user' ? 'text-blue-200' : 'text-gray-400'}`}>
                 {mounted ? msg.timestamp.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : ''}
@@ -178,7 +180,8 @@ export default function NTOSAgentPanel({
           <button
             onClick={() => sendMessage()}
             disabled={!input.trim() || loading}
-            className="bg-drc-blue text-white p-2 rounded-lg hover:bg-drc-blue-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed self-end"
+            className="btn-primary !px-3 !py-2.5 rounded-xl disabled:opacity-40 disabled:cursor-not-allowed self-end"
+            aria-label="Envoyer"
           >
             <Send className="w-4 h-4" />
           </button>

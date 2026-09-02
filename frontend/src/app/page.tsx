@@ -96,46 +96,52 @@ export default function LandingPage() {
           <div className="max-w-4xl animate-fade-up">
             {/* Party badge */}
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-6">
-              <Shield className="w-4 h-4 text-drc-yellow" />
-              <span className="text-sm font-semibold text-drc-yellow">Le Congo D’Abord</span>
-              <span className="text-white/60 text-sm">•</span>
-              <span className="text-sm text-white/80">Système Intelligent du Parti</span>
+              <span className="w-2 h-2 rounded-full bg-drc-yellow animate-pulse" />
+              <span className="text-sm font-semibold text-drc-yellow">Adhésion gratuite</span>
+              <span className="text-white/50 text-sm">•</span>
+              <span className="text-sm text-white/85">Chaque franc traçable publiquement</span>
             </div>
 
-            {/* Party Name */}
-            <h1 className="text-5xl md:text-7xl font-black mb-4 leading-tight">
-              <span className="text-white">Le Congo</span>{' '}
-              <span className="text-drc-yellow">D'Abord</span>
+            {/* Headline — the promise, not the brand flex */}
+            <h1 className="text-4xl md:text-6xl font-black mb-5 leading-[1.05]">
+              <span className="text-white">Ils ont pris votre voix</span>{' '}
+              <span className="text-white/70">et votre argent.</span><br />
+              <span className="text-drc-yellow">Reprenez le pouvoir.</span>
             </h1>
 
-            {/* Tagline */}
-            <p className="text-lg md:text-xl text-blue-200 mb-6 leading-relaxed max-w-3xl">
-              Le premier parti politique congolais dirigé par des citoyens, renforcé par
-              l&apos;intelligence artificielle, structuré depuis le village jusqu&apos;à la Présidence,
-              et fondé sur la <strong className="text-white">compétence</strong>,
-              la <strong className="text-white">transparence</strong> et
-              la <strong className="text-white">méritocratie</strong>.
+            {/* Sub — pain → mechanism → reframe the money */}
+            <p className="text-lg md:text-xl text-blue-100/90 mb-6 leading-relaxed max-w-2xl text-pretty">
+              Pendant des décennies, les partis ont encaissé vos cotisations puis oublié
+              votre village. <strong className="text-white">Le Congo D&apos;Abord</strong> est
+              construit autrement : chaque cotisation est <strong className="text-white">suivie
+              publiquement</strong>, et chaque candidat est choisi par un{' '}
+              <strong className="text-white">score de mérite</strong> que ni l&apos;argent, ni la
+              tribu, ni le piston ne peuvent truquer.
             </p>
 
-            {/* Founder */}
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 bg-drc-yellow rounded-full flex items-center justify-center">
+            <p className="text-base text-drc-yellow font-semibold mb-8">
+              Vous ne payez pas pour adhérer. Vous adhérez pour reprendre le contrôle.
+            </p>
+
+            {/* CTAs — remove the money barrier, lead with proof */}
+            <div className="flex flex-wrap gap-3">
+              <Link href="/register" className="btn-secondary flex items-center gap-2 text-base">
+                Prendre ma place — c&apos;est gratuit <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link href="/contributions" className="glass text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/15 transition-all flex items-center gap-2">
+                Voir où va chaque dollar <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            {/* Founder — credibility, kept human */}
+            <div className="flex items-center gap-3 mt-8">
+              <div className="w-10 h-10 bg-drc-yellow rounded-full flex items-center justify-center shrink-0">
                 <span className="text-drc-blue-dark font-black text-sm">JN</span>
               </div>
               <div>
                 <p className="text-white/60 text-xs uppercase tracking-widest">Fondateur &amp; Président</p>
                 <p className="text-white font-bold text-lg">Mr Justin Nseya</p>
               </div>
-            </div>
-
-            {/* CTAs */}
-            <div className="flex flex-wrap gap-4">
-              <Link href="/register" className="btn-secondary flex items-center gap-2 text-base">
-                Rejoindre le Parti <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link href="/dashboard" className="border-2 border-white/30 text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/10 transition-all flex items-center gap-2">
-                Tableau de bord <ChevronRight className="w-4 h-4" />
-              </Link>
             </div>
 
             {/* Countdown to national launch — 4 January 2027 */}
@@ -185,12 +191,70 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ===== AI AGENTS ===== */}
+      {/* ===== 3 VERIFIABLE PROMISES (trust before pitch) ===== */}
       <section className="py-20 bg-white">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="text-center mb-4">
+            <p className="text-sm font-bold uppercase tracking-widest text-drc-red">Ne nous croyez pas sur parole</p>
+            <h2 className="section-title mt-2">Vérifiez chaque promesse vous-même</h2>
+            <p className="section-subtitle max-w-2xl mx-auto">
+              Les partis promettent. Nous, nous vous donnons les moyens de contrôler — avant, pendant, et après.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+            {[
+              {
+                icon: TrendingUp,
+                tag: 'Votre argent',
+                title: 'Chaque dollar est suivi publiquement',
+                body: "Pas de caisse noire. Chaque cotisation entre dans un registre consultable — vous voyez ce qui rentre et où ça va, en continu.",
+                href: '/contributions',
+                cta: 'Ouvrir le registre',
+              },
+              {
+                icon: Award,
+                tag: 'Vos candidats',
+                title: 'Le mérite décide, pas le piston',
+                body: "Chaque candidat reçoit un score public (éducation, expérience, intégrité, ancrage local). Ni l'argent, ni la tribu, ni les relations ne peuvent le truquer.",
+                href: '/candidates',
+                cta: 'Voir la formule du score',
+              },
+              {
+                icon: MapPin,
+                tag: 'Votre place',
+                title: 'Du village à la Présidence',
+                body: "Une structure à 7 niveaux, de votre village jusqu'au national. Où que vous soyez, vous avez une place et une voix — pas seulement à Kinshasa.",
+                href: '/dashboard',
+                cta: 'Voir la structure',
+              },
+            ].map(card => {
+              const Icon = card.icon;
+              return (
+                <Link key={card.title} href={card.href} className="card-hover group flex flex-col">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center">
+                      <Icon className="w-5 h-5 text-drc-blue" />
+                    </div>
+                    <span className="text-[11px] font-bold uppercase tracking-widest text-drc-blue/70">{card.tag}</span>
+                  </div>
+                  <h3 className="font-bold text-lg text-gray-900 mb-2 group-hover:text-drc-blue transition-colors">{card.title}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed flex-1">{card.body}</p>
+                  <span className="inline-flex items-center gap-1 text-sm font-bold text-drc-blue mt-4">
+                    {card.cta} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== AI AGENTS ===== */}
+      <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-green-100 text-drc-blue px-4 py-2 rounded-full text-sm font-semibold mb-4">
-              <Brain className="w-4 h-4" /> Intelligence Artificielle
+            <div className="inline-flex items-center gap-2 bg-blue-100 text-drc-blue px-4 py-2 rounded-full text-sm font-semibold mb-4">
+              <Brain className="w-4 h-4" /> Comment le mérite reste incorruptible
             </div>
             <h2 className="section-title">12 Agents IA Spécialisés</h2>
             <p className="section-subtitle">
@@ -350,19 +414,23 @@ export default function LandingPage() {
             <Users className="w-8 h-8 text-drc-yellow" />
           </div>
           <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-4">
-            Rejoignez la révolution politique du Congo
+            Prenez votre place. Aujourd&apos;hui, c&apos;est gratuit.
           </h2>
-          <p className="text-gray-600 mb-2">Cotisation mensuelle : <strong>1 USD / mois</strong></p>
+          <p className="text-gray-600 mb-2 text-lg">
+            L&apos;adhésion ne coûte <strong className="text-drc-blue">rien</strong>. Vous décidez de
+            cotiser <strong>1 USD/mois</strong> seulement quand vous êtes prêt — et vous voyez
+            exactement où va cet argent.
+          </p>
           <p className="text-gray-500 text-sm mb-8">
-            Votre cotisation vous ouvre l&apos;accès à la sélection interne, aux nominations,
-            aux formations et à la construction d&apos;un Congo meilleur.
+            Être membre vous ouvre la sélection interne au mérite, les formations de l&apos;Académie
+            et une voix réelle, de votre village jusqu&apos;au national.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link href="/register" className="btn-primary flex items-center gap-2 text-lg px-8 py-4">
-              S&apos;inscrire maintenant <ArrowRight className="w-5 h-5" />
+              Prendre ma place — gratuit <ArrowRight className="w-5 h-5" />
             </Link>
-            <Link href="/candidates" className="border-2 border-drc-blue text-drc-blue px-8 py-4 rounded-lg font-bold hover:bg-blue-50 transition-all flex items-center gap-2">
-              Voir les candidats IA <Brain className="w-5 h-5" />
+            <Link href="/contributions" className="border-2 border-drc-blue text-drc-blue px-8 py-4 rounded-xl font-bold hover:bg-blue-50 transition-all flex items-center gap-2">
+              Voir où va chaque dollar <TrendingUp className="w-5 h-5" />
             </Link>
           </div>
 

@@ -7,7 +7,7 @@ import NTOSAgentPanel from '@/components/NTOSAgentPanel';
 export default function DeliveryStructurePage() {
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-orange-600 text-white py-10 px-4">
+      <div className="hero-gradient text-white py-12 px-4 relative overflow-hidden">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center gap-2 text-orange-200 text-sm mb-3">
             <Link href="/projects" className="hover:text-white">SNTO</Link>

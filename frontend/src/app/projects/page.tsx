@@ -160,7 +160,7 @@ export default function ProjectsPage() {
     <div className="min-h-screen bg-gray-50">
       <DemoDataBanner />
       {/* Hero */}
-      <div className="bg-drc-blue text-white py-12 px-4">
+      <div className="hero-gradient text-white py-14 px-4 relative overflow-hidden">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-2 text-blue-200 text-sm mb-3">
             <Link href="/" className="hover:text-white">Accueil</Link>

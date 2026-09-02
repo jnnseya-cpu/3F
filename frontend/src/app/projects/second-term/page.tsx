@@ -23,7 +23,7 @@ const TERM2_EXAMPLES = [
 export default function SecondTermPage() {
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-slate-700 text-white py-10 px-4">
+      <div className="hero-gradient text-white py-12 px-4 relative overflow-hidden">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center gap-2 text-slate-300 text-sm mb-3">
             <Link href="/projects" className="hover:text-white">SNTO</Link>
