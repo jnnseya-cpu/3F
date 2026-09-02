@@ -1,5 +1,6 @@
+import Link from 'next/link';
 import { FOUNDER } from '@/lib/founder';
-import { Quote, CheckCircle2 } from 'lucide-react';
+import { Quote, CheckCircle2, ArrowRight } from 'lucide-react';
 
 /**
  * Founder credibility block. Renders only what is truthfully provided in
@@ -73,6 +74,12 @@ export default function FounderSection() {
                     </li>
                   ))}
                 </ul>
+                <Link
+                  href="/promesses"
+                  className="inline-flex items-center gap-2 text-sm font-bold text-drc-blue mt-5 hover:gap-3 transition-all"
+                >
+                  Comment nous tenons ces promesses <ArrowRight className="w-4 h-4" />
+                </Link>
               </div>
             )}
 
