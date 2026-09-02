@@ -30,7 +30,21 @@ Growth: `/growth` + `/growth/[tool]` (10 tools)
 SEO: `/blog` + `/blog/[slug]` (35 articles) · `/province` + `/province/[slug]` (26 provinces)
 Referral: `/invite` · Security: `/security`
 
-## API routes (13 — all ✅)
+## Trust & honesty (no fabricated data shown as real)
+- **Public contribution ledger** (`/api/contributions/ledger`, `components/PublicLedger.tsx`):
+  aggregates REAL verified payments via the Admin SDK (webhook records amount/plan
+  on each idempotency doc). Before it's live → honest "opens with the first
+  contributions (2027)" state; never invents numbers or exposes member names.
+- **Founder block** (`lib/founder.ts` single source, `components/FounderSection.tsx`):
+  shows only truthful content — real founding statement + public pledges; the
+  photo/bio/credentials slots are hidden until real facts are filled in (no
+  fabricated biography for a real person). Add `/public/founder.jpg` + fill
+  `bio`/`credentials` to populate.
+- Removed fabricated named member financial records from `/contributions`;
+  individual cotisations are private by design. Remaining illustrative charts are
+  now clearly labelled **projections**, never past-tense fact.
+
+## API routes (14 — all ✅)
 `/api/agents/chat` · `/api/growth/generate` · `/api/members/register`
 `/api/payments/checkout` · `/api/payments/webhook` · `/api/acu/balance`
 `/api/referral/track` · `/api/security/challenge` · `/api/security/sentinel`

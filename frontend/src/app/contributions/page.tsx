@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import DemoDataBanner from '@/components/DemoDataBanner';
+import PublicLedger from '@/components/PublicLedger';
 import { DollarSign, CheckCircle, Clock, XCircle, TrendingUp, Users, AlertTriangle, Download } from 'lucide-react';
 import ContributionBadge from '@/components/ContributionBadge';
 import type { ContributionStatus } from '@/lib/types';
@@ -31,15 +32,6 @@ const PROVINCE_BREAKDOWN = [
   { name: 'Kasaï-Oriental', members: 1280, active: 950, revenue: 4750 },
   { name: 'Kongo Central', members: 1850, active: 1340, revenue: 6700 },
   { name: 'Kwilu', members: 1680, active: 1230, revenue: 6150 },
-];
-
-const MEMBER_CONTRIBUTIONS = [
-  { name: 'Marie-Claire Kalonga', province: 'Nord-Kivu', status: 'Active' as ContributionStatus, lastPayment: '2025-06-01', months: 18 },
-  { name: 'Jean-Baptiste Mutombo', province: 'Haut-Katanga', status: 'Active' as ContributionStatus, lastPayment: '2025-06-01', months: 17 },
-  { name: 'Patrick Mbeki', province: 'Kinshasa', status: 'Active' as ContributionStatus, lastPayment: '2025-06-02', months: 18 },
-  { name: 'Amina Kabila', province: 'Maniema', status: 'Grace Period' as ContributionStatus, lastPayment: '2025-04-15', months: 14 },
-  { name: 'Didier Tshibanda', province: 'Kasaï-Central', status: 'Suspended' as ContributionStatus, lastPayment: '2025-02-01', months: 8 },
-  { name: 'Félicité Muamba', province: 'Kwilu', status: 'Active' as ContributionStatus, lastPayment: '2025-06-01', months: 18 },
 ];
 
 const EXPENSE_BREAKDOWN = [
@@ -113,16 +105,26 @@ export default function ContributionsPage() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
 
+        {/* REAL public ledger — live aggregates or honest pre-launch state.
+            This is the authoritative, non-fabricated view. */}
+        <div className="mb-8">
+          <PublicLedger />
+        </div>
+
         {/* Overview */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
+            <div className="inline-flex items-center gap-2 text-xs font-semibold text-gray-500 bg-gray-100 border border-gray-200 rounded-full px-3 py-1.5">
+              <AlertTriangle className="w-3.5 h-3.5 text-yellow-600" />
+              Projections illustratives — objectifs de modèle, pas des chiffres réels. Le réel est dans le registre public ci-dessus.
+            </div>
             {/* Summary Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: 'Membres totaux', value: totalMembers.toLocaleString(), sub: 'inscrits', icon: Users, color: 'text-drc-blue' },
-                { label: 'Cotisants actifs', value: activeCount.toLocaleString(), sub: `${Math.round(activeCount / totalMembers * 100)}% des membres`, icon: CheckCircle, color: 'text-emerald-600' },
-                { label: 'Recettes juin 2025', value: '$136,700', sub: 'USD collectés', icon: DollarSign, color: 'text-yellow-700' },
-                { label: 'Total 2025', value: `$${(totalRevenue / 1000).toFixed(0)}k`, sub: 'cumulé 2025', icon: TrendingUp, color: 'text-blue-600' },
+                { label: 'Objectif membres', value: totalMembers.toLocaleString(), sub: 'projection', icon: Users, color: 'text-drc-blue' },
+                { label: 'Cotisants (modèle)', value: activeCount.toLocaleString(), sub: `${Math.round(activeCount / totalMembers * 100)}% des membres`, icon: CheckCircle, color: 'text-emerald-600' },
+                { label: 'Recettes mensuelles', value: '$136,700', sub: 'objectif projeté', icon: DollarSign, color: 'text-yellow-700' },
+                { label: 'Cumul annuel', value: `$${(totalRevenue / 1000).toFixed(0)}k`, sub: 'projection', icon: TrendingUp, color: 'text-blue-600' },
               ].map(card => {
                 const Icon = card.icon;
                 return (
@@ -141,8 +143,8 @@ export default function ContributionsPage() {
             {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 card">
-                <h3 className="font-bold text-gray-900 mb-1">Recettes mensuelles 2025</h3>
-                <p className="text-xs text-gray-500 mb-4">Collecté vs objectif (USD)</p>
+                <h3 className="font-bold text-gray-900 mb-1">Modèle de recettes mensuelles</h3>
+                <p className="text-xs text-gray-500 mb-4">Projection illustrative vs objectif (USD)</p>
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart data={MONTHLY_DATA}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -184,41 +186,23 @@ export default function ContributionsPage() {
           </div>
         )}
 
-        {/* Members Tab */}
+        {/* Members Tab — no individual financial records are published.
+            Privacy by design; the public sees aggregates only (ledger above). */}
         {activeTab === 'members' && (
-          <div className="card">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-gray-900">Statut des contributions par membre</h3>
-              <span className="text-xs text-gray-500">Données anonymisées pour la démo</span>
+          <div className="card max-w-2xl">
+            <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
+              <Users className="w-6 h-6 text-drc-blue" />
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    {['Membre', 'Province', 'Statut', 'Dernier paiement', 'Mois actifs', 'Total payé'].map(h => (
-                      <th key={h} className="text-left py-2 px-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {MEMBER_CONTRIBUTIONS.map((m, i) => (
-                    <tr key={i} className="hover:bg-gray-50">
-                      <td className="py-3 px-3 font-medium text-gray-900">{m.name}</td>
-                      <td className="py-3 px-3 text-gray-600">{m.province}</td>
-                      <td className="py-3 px-3"><ContributionBadge status={m.status} /></td>
-                      <td className="py-3 px-3 text-gray-600">{m.lastPayment}</td>
-                      <td className="py-3 px-3 text-gray-600">{m.months}</td>
-                      <td className="py-3 px-3 font-semibold text-drc-blue">${(m.months * 5).toLocaleString()}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-              <p className="text-xs text-gray-500 italic">
-                Note : Les données personnelles financières des membres sont strictement confidentielles.
-                Ce tableau est accessible uniquement aux officiers autorisés du parti.
-              </p>
+            <h3 className="font-bold text-gray-900 text-lg mb-2">Les cotisations individuelles restent privées</h3>
+            <p className="text-sm text-gray-600 leading-relaxed mb-4">
+              Nous ne publions jamais qui a payé quoi. La transparence porte sur les
+              <strong> totaux</strong> — combien entre, et où va l&apos;argent — visibles par tous
+              dans le <strong>Registre public</strong> en haut de cette page. Chaque membre consulte
+              son propre statut de cotisation depuis son espace personnel.
+            </p>
+            <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
+              <AlertTriangle className="w-4 h-4 text-yellow-600 shrink-0" />
+              Confidentialité par conception : aucune donnée financière nominative n&apos;est exposée publiquement.
             </div>
           </div>
         )}

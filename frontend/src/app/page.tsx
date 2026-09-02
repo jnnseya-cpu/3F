@@ -10,6 +10,7 @@ import { translations } from '@/lib/translations';
 import type { Language } from '@/lib/translations';
 import { DRC_PROVINCES, getTotalMembers, getTotalActiveContributors } from '@/lib/provinces';
 import LaunchCountdown from '@/components/LaunchCountdown';
+import FounderSection from '@/components/FounderSection';
 
 const SLOGANS = [
   { lang: 'Français', text: "Le Congo d'abord. La compétence avant les promesses." },
@@ -248,6 +249,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ===== FOUNDER ===== */}
+      <FounderSection />
 
       {/* ===== AI AGENTS ===== */}
       <section className="py-20 bg-gray-50">

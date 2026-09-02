@@ -53,17 +53,26 @@ function verifySignature(raw: string, headers: Headers, secret: string): boolean
   return Boolean(shared) && safeEqual(shared, secret);
 }
 
-/** Atomically claim an event id. true = first time, false = already processed. */
-async function claimEvent(eventId: string): Promise<boolean> {
+/**
+ * Atomically claim an event id. true = first time, false = already processed.
+ * `record` fields are persisted on the claim doc so the public ledger can
+ * aggregate REAL contributions (amount, plan, province) with no extra write.
+ */
+async function claimEvent(eventId: string, record: Record<string, unknown> = {}): Promise<boolean> {
   const db = adminDb();
   if (db) {
     const ref = db.collection('processed_payments').doc(eventId);
     return db.runTransaction(async tx => {
       const snap = await tx.get(ref);
       if (snap.exists) return false;
-      tx.set(ref, { processedAt: new Date().toISOString() });
+      tx.set(ref, { processedAt: new Date().toISOString(), ...record });
       return true;
     });
+  }
+  const fields: Record<string, unknown> = { processedAt: { stringValue: new Date().toISOString() } };
+  for (const [k, v] of Object.entries(record)) {
+    if (typeof v === 'number') fields[k] = { doubleValue: v };
+    else fields[k] = { stringValue: String(v) };
   }
   const res = await fetch(`${REST()}:commit?key=${process.env.FIREBASE_API_KEY}`, {
     method: 'POST',
@@ -71,7 +80,7 @@ async function claimEvent(eventId: string): Promise<boolean> {
     body: JSON.stringify({
       writes: [
         {
-          update: { name: docName('processed_payments', eventId), fields: { processedAt: { stringValue: new Date().toISOString() } } },
+          update: { name: docName('processed_payments', eventId), fields },
           currentDocument: { exists: false },
         },
       ],
@@ -218,8 +227,16 @@ export async function POST(req: NextRequest) {
       console.error('Member activation failed for', memberId);
       return NextResponse.json({ error: 'Activation failed, retry' }, { status: 500 });
     }
-    // Then claim — guards the ADDITIVE credit against replays/retries.
-    const firstTime = await claimEvent(`pay-${id}`);
+    // Then claim — guards the ADDITIVE credit against replays/retries. The
+    // amount/plan are recorded on the claim so the public ledger can aggregate
+    // real contributions.
+    const firstTime = await claimEvent(`pay-${id}`, {
+      type: 'payment',
+      memberId,
+      amountUsd: plan.amount,
+      plan: plan.id,
+      at: new Date().toISOString(),
+    });
     if (!firstTime) return NextResponse.json({ received: true, duplicate: true, id });
     let acuCredited = 0;
     try {
