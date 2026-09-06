@@ -6,8 +6,7 @@ import {
   Users, Brain, Shield, Globe, TrendingUp, MapPin, BookOpen,
   CheckCircle, ArrowRight, Star, Zap, Award, ChevronRight
 } from 'lucide-react';
-import { translations } from '@/lib/translations';
-import type { Language } from '@/lib/translations';
+import { useLanguage } from '@/lib/i18n';
 import { DRC_PROVINCES } from '@/lib/provinces';
 import LaunchCountdown from '@/components/LaunchCountdown';
 import FounderSection from '@/components/FounderSection';
@@ -47,9 +46,8 @@ const DIFFERENCES = [
 ];
 
 export default function LandingPage() {
-  const [activeLang] = useState<Language>('fr');
+  const { t } = useLanguage();
   const [activeSloganIdx, setActiveSloganIdx] = useState(0);
-  const tr = translations[activeLang];
 
   return (
     <div className="min-h-screen">
@@ -95,39 +93,34 @@ export default function LandingPage() {
             {/* Party badge */}
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-6">
               <span className="w-2 h-2 rounded-full bg-drc-yellow animate-pulse" />
-              <span className="text-sm font-semibold text-drc-yellow">Adhésion gratuite</span>
+              <span className="text-sm font-semibold text-drc-yellow">{t('home.badge1')}</span>
               <span className="text-white/50 text-sm">•</span>
-              <span className="text-sm text-white/85">Chaque franc traçable publiquement</span>
+              <span className="text-sm text-white/85">{t('home.badge2')}</span>
             </div>
 
             {/* Headline — the promise, not the brand flex */}
             <h1 className="text-4xl md:text-6xl font-black mb-5 leading-[1.05]">
-              <span className="text-white">Ils ont pris votre voix</span>{' '}
-              <span className="text-white/70">et votre argent.</span><br />
-              <span className="text-drc-yellow">Reprenez le pouvoir.</span>
+              <span className="text-white">{t('home.h1a')}</span>{' '}
+              <span className="text-white/70">{t('home.h1b')}</span><br />
+              <span className="text-drc-yellow">{t('home.h1c')}</span>
             </h1>
 
             {/* Sub — pain → mechanism → reframe the money */}
             <p className="text-lg md:text-xl text-blue-100/90 mb-6 leading-relaxed max-w-2xl text-pretty">
-              Pendant des décennies, les partis ont encaissé vos cotisations puis oublié
-              votre village. <strong className="text-white">Le Congo D&apos;Abord</strong> est
-              construit autrement : chaque cotisation est <strong className="text-white">suivie
-              publiquement</strong>, et chaque candidat est choisi par un{' '}
-              <strong className="text-white">score de mérite</strong> que ni l&apos;argent, ni la
-              tribu, ni le piston ne peuvent truquer.
+              {t('home.sub')}
             </p>
 
             <p className="text-base text-drc-yellow font-semibold mb-8">
-              Vous ne payez pas pour adhérer. Vous adhérez pour reprendre le contrôle.
+              {t('home.money')}
             </p>
 
             {/* CTAs — remove the money barrier, lead with proof */}
             <div className="flex flex-wrap gap-3">
               <Link href="/register" className="btn-secondary flex items-center gap-2 text-base">
-                Prendre ma place — c&apos;est gratuit <ArrowRight className="w-4 h-4" />
+                {t('home.cta1')} <ArrowRight className="w-4 h-4" />
               </Link>
               <Link href="/contributions" className="glass text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/15 transition-all flex items-center gap-2">
-                Voir où va chaque dollar <ChevronRight className="w-4 h-4" />
+                {t('home.cta2')} <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
 

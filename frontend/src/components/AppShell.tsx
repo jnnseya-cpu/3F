@@ -1,18 +1,32 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import PageViewTracker from '@/components/PageViewTracker';
 import type { Language } from '@/lib/translations';
+import { LanguageContext } from '@/lib/i18n';
 import { LAUNCH_LABEL_FR } from '@/lib/launch';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [language, setLanguage] = useState<Language>('fr');
 
+  // Restore the visitor's language choice, then persist changes.
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('lcd_lang');
+      if (saved && ['fr', 'ln', 'kg', 'ts', 'sw'].includes(saved)) setLanguage(saved as Language);
+    } catch { /* private mode */ }
+  }, []);
+
+  const setLang = (l: Language) => {
+    setLanguage(l);
+    try { localStorage.setItem('lcd_lang', l); } catch { /* ignore */ }
+  };
+
   return (
-    <>
+    <LanguageContext.Provider value={{ lang: language, setLang }}>
       <PageViewTracker />
-      <Navbar language={language} setLanguage={setLanguage} />
+      <Navbar language={language} setLanguage={setLang} />
       <main>{children}</main>
       <footer className="text-white mt-20 relative overflow-hidden"
               style={{ backgroundImage: 'radial-gradient(900px 400px at 90% -30%, rgba(51,153,255,0.25), transparent 60%), linear-gradient(180deg, #0055CC 0%, #002f77 100%)' }}>
@@ -54,6 +68,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </footer>
-    </>
+    </LanguageContext.Provider>
   );
 }

@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { humanFetch } from '@/lib/humanClient';
 import { trackRegistration } from '@/lib/analytics';
 import { CheckCircle, User, MapPin, BookOpen, Briefcase, Star, DollarSign, ChevronRight, ChevronLeft, AlertCircle, Rocket } from 'lucide-react';
-import { LAUNCH_LABEL_FR } from '@/lib/launch';
 import { saveSession } from '@/lib/memberSession';
+import { useLanguage } from '@/lib/i18n';
 import Link from 'next/link';
 import { DRC_PROVINCES, CONTINENTS, AFRICAN_COUNTRIES } from '@/lib/provinces';
 
@@ -85,6 +85,7 @@ const initialForm: FormData = {
 };
 
 export default function RegisterPage() {
+  const { t } = useLanguage();
   const [step, setStep] = useState<Step>(1);
   const [form, setForm] = useState<FormData>(initialForm);
   const [submitted, setSubmitted] = useState(false);
@@ -239,10 +240,10 @@ export default function RegisterPage() {
       <div className="bg-drc-blue text-white py-8">
         <div className="flag-stripe -mt-8 mb-0" />
         <div className="max-w-4xl mx-auto px-4 pt-8 text-center">
-          <h1 className="text-3xl font-black mb-2">Inscription — Le Congo D'Abord</h1>
-          <p className="text-blue-200">Rejoignez le mouvement citoyen pour un Congo meilleur</p>
+          <h1 className="text-3xl font-black mb-2">{t('reg.title')}</h1>
+          <p className="text-blue-200">{t('reg.sub')}</p>
           <p className="mt-3 inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-sm text-drc-yellow font-semibold">
-            <Rocket className="w-4 h-4" /> Lancement national le {LAUNCH_LABEL_FR} — inscrivez-vous avant le grand jour
+            <Rocket className="w-4 h-4" /> {t('reg.launch')}
           </p>
         </div>
       </div>

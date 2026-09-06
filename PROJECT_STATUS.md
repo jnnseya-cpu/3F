@@ -151,6 +151,12 @@ Media/CDN and push notifications are **covered by Firebase** (Storage + FCM) —
 
 ## Known limitations (honest)
 - Lingala/Swahili articles were AI-authored; need native review (see above).
+- **Funnel i18n (`lib/funnelCopy.ts`)**: the reframed hero + register + CTAs are
+  translated into all 5 languages, but **ln/kg/ts/sw are AI-authored and MUST get
+  native-speaker review before launch** (Kikongo/Tshiluba especially). French is
+  authoritative; missing keys fall back to French. The shared language context
+  (`lib/i18n.tsx`, provided by `AppShell`) fixed a real bug where the navbar
+  switcher didn't change page content (the landing was locked to French).
 - No native mobile app / offline mode (web only, but installable PWA).
 - No CENI voter-file integration.
 - **Auth is dormant scaffolding.** `/api/auth/[...nextauth]` holds a single demo
