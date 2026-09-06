@@ -96,6 +96,38 @@ Verified via Playwright screenshots (landing, register, blog, dashboard).
 
 ---
 
+## 🚨 MARKET-READINESS BLOCKERS (P0 — why the site can't convert/retain yet)
+These are missing *product surfaces*, not just keys. Beautiful brochure ≠ usable product.
+1. **No way to pay.** `/api/payments/checkout` exists but is called from **zero UI** —
+   there is no "Cotiser $1" button anywhere. Even with BitriPay live, no one can pay. $0 path.
+2. **No login / no way back in.** No `useSession`, no `/login`, no account recovery.
+   Identity lives only in one browser's `localStorage` (`lcd_member_id`/`lcd_member_token`).
+   Clear cache or switch phone = locked out forever (ACUs/AI gone). `/contributions` even
+   promises an "espace personnel" that does not exist.
+3. **Pre-launch registrations are discarded.** Without Firebase, `register` returns 202
+   "queued" but stores nothing (just `console.warn`). No waitlist/lead capture → every
+   visitor the countdown attracts is forgotten.
+4. **Phone-first market, no phone rails.** Registration collects a phone but never verifies
+   it (no OTP/SMS). No WhatsApp login. No mobile-money. Built like Western web SaaS.
+5. Payment rail mismatch: BitriPay integration is an unverified stub; DRC pays via
+   Airtel/Orange/M-Pesa mobile money — needs a mobile-money aggregator, not just crypto.
+6. Founder credibility block is still an empty placeholder (no real photo/bio).
+
+## 🔑 EXTERNAL ACCOUNTS STILL REQUIRED (beyond AI, existing integrations, and email/SMTP)
+| Service | Env / keys | Why it's blocking |
+|---|---|---|
+| **Firebase** (project + **service account**) | `FIREBASE_PROJECT_ID`, `FIREBASE_API_KEY`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` | Coded, account still needed. Backbone: members, ledger, ACU, auth, storage. Nothing persists without it. |
+| **Mobile-money / payment gateway** | `BITRIPAY_*` or a DRC aggregator (CinetPay / Flexpay / MaxiCash / Flutterwave) | The only way to collect the $1. Prefer one covering Airtel Money + Orange Money + M-Pesa. |
+| **SMS / OTP** (Africa's Talking or Twilio) | e.g. `SMS_API_KEY`/`SMS_USERNAME` (new) | Phone verification + 2FA in a phone-first market. None exists yet. |
+| **WhatsApp Business API** (Meta Cloud API / 360dialog / Twilio) | `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID` (new) | Dominant DRC channel — onboarding, OTP login, notifications. |
+| **Meta Pixel + Google Analytics** (accounts) | `NEXT_PUBLIC_META_PIXEL_ID`, `NEXT_PUBLIC_GA_ID` | Coded, accounts not set. Can't measure/optimize acquisition without them. |
+| **Error monitoring** (Sentry) | `SENTRY_DSN` (new) | Production reliability/visibility at launch scale. Strongly recommended. |
+| **Bot defense / CAPTCHA** (Cloudflare Turnstile / hCaptcha) | `TURNSTILE_SECRET` + site key (new) | Hardens the human gate at real traffic; complements custom Sentinel. Recommended. |
+| **Domain + DNS + hosting** (Vercel + `congodabord.cd`) | `NEXT_PUBLIC_SITE_URL` | Live address, correct canonical/sitemap. |
+| *(optional)* Maps/geocoding (Mapbox/Google) | `NEXT_PUBLIC_MAPS_KEY` | Province/territory structure visuals. Nice-to-have. |
+
+Media/CDN and push notifications are **covered by Firebase** (Storage + FCM) — no extra vendor.
+
 ## 🔌 NEEDS KEY (add in Vercel env vars near launch — no code needed)
 | Variable | Unlocks |
 |---|---|
