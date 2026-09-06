@@ -198,7 +198,7 @@ export default function ContributionsPage() {
               Nous ne publions jamais qui a payé quoi. La transparence porte sur les
               <strong> totaux</strong> — combien entre, et où va l&apos;argent — visibles par tous
               dans le <strong>Registre public</strong> en haut de cette page. Chaque membre consulte
-              son propre statut de cotisation depuis son espace personnel.
+              son propre statut de cotisation depuis <a href="/mon-espace" className="text-drc-blue font-semibold hover:underline">son espace personnel</a>.
             </p>
             <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
               <AlertTriangle className="w-4 h-4 text-yellow-600 shrink-0" />

@@ -28,7 +28,8 @@ Core: `/` `/register` `/dashboard` `/dashboard/provincial` `/dashboard/local`
 SNTO: `/projects` + 11 agent pages + `/projects/command-centre`
 Growth: `/growth` + `/growth/[tool]` (10 tools)
 SEO: `/blog` + `/blog/[slug]` (35 articles) · `/province` + `/province/[slug]` (26 provinces)
-Referral: `/invite` · Security: `/security`
+Referral: `/invite` · Security: `/security` · Trust: `/promesses`
+Member: `/login` · `/mon-espace` (session-based return + contribution front door)
 
 ## Trust & honesty (no fabricated data shown as real)
 - **Public contribution ledger** (`/api/contributions/ledger`, `components/PublicLedger.tsx`):
@@ -44,7 +45,8 @@ Referral: `/invite` · Security: `/security`
   individual cotisations are private by design. Remaining illustrative charts are
   now clearly labelled **projections**, never past-tense fact.
 
-## API routes (14 — all ✅)
+## API routes (17 — all ✅)
+`/api/members/login` · `/api/members/me` · `/api/contributions/ledger` (added) ·
 `/api/agents/chat` · `/api/growth/generate` · `/api/members/register`
 `/api/payments/checkout` · `/api/payments/webhook` · `/api/acu/balance`
 `/api/referral/track` · `/api/security/challenge` · `/api/security/sentinel`
@@ -96,22 +98,20 @@ Verified via Playwright screenshots (landing, register, blog, dashboard).
 
 ---
 
-## 🚨 MARKET-READINESS BLOCKERS (P0 — why the site can't convert/retain yet)
-These are missing *product surfaces*, not just keys. Beautiful brochure ≠ usable product.
-1. **No way to pay.** `/api/payments/checkout` exists but is called from **zero UI** —
-   there is no "Cotiser $1" button anywhere. Even with BitriPay live, no one can pay. $0 path.
-2. **No login / no way back in.** No `useSession`, no `/login`, no account recovery.
-   Identity lives only in one browser's `localStorage` (`lcd_member_id`/`lcd_member_token`).
-   Clear cache or switch phone = locked out forever (ACUs/AI gone). `/contributions` even
-   promises an "espace personnel" that does not exist.
-3. **Pre-launch registrations are discarded.** Without Firebase, `register` returns 202
-   "queued" but stores nothing (just `console.warn`). No waitlist/lead capture → every
-   visitor the countdown attracts is forgotten.
-4. **Phone-first market, no phone rails.** Registration collects a phone but never verifies
-   it (no OTP/SMS). No WhatsApp login. No mobile-money. Built like Western web SaaS.
-5. Payment rail mismatch: BitriPay integration is an unverified stub; DRC pays via
-   Airtel/Orange/M-Pesa mobile money — needs a mobile-money aggregator, not just crypto.
-6. Founder credibility block is still an empty placeholder (no real photo/bio).
+## 🚨 MARKET-READINESS BLOCKERS (P0) — status
+Product surfaces, not just keys. Code-side items now BUILT; the rest are gated on YOUR accounts.
+1. ✅ **Payment front door built.** `components/PayButton.tsx` (plan selector → `/api/payments/checkout`
+   → gateway redirect) now lives on `/mon-espace`. Gracefully shows "paiement bientôt" until
+   `BITRIPAY_*` keys exist; never fakes success. *(Needs the payment account to actually charge.)*
+2. ✅ **Login / account recovery built.** `/login` + `/api/members/login` (lookup by email/phone),
+   `/mon-espace` member space, session in `lib/memberSession.ts`, nav links (Se connecter / Mon espace).
+   Security: the ACU spend token is withheld on email-only login when enforcement is on (`needsOtp`),
+   preventing account takeover — full re-auth activates with the OTP provider. *(Needs Firebase to look up.)*
+3. 🔌 **Lead capture** — real fix needs a datastore; `register` persists via Firebase/Admin when
+   configured. Without a DB there is nowhere to store pre-launch signups. *(Gated on Firebase account.)*
+4. 🔌 **Phone/OTP + WhatsApp** — UI is phone-ready; verification needs an SMS/WhatsApp provider account.
+5. 🔌 **Mobile-money rail** — PayButton is provider-agnostic; needs a DRC aggregator (Airtel/Orange/M-Pesa).
+6. 👤 **Founder photo/bio** — honest placeholders; only the user can supply real, verified content.
 
 ## 🔑 EXTERNAL ACCOUNTS STILL REQUIRED (beyond AI, existing integrations, and email/SMTP)
 | Service | Env / keys | Why it's blocking |

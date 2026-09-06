@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
-import { Menu, X, Shield } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Menu, X, Shield, UserCircle2, LogIn } from 'lucide-react';
+import { getSession } from '@/lib/memberSession';
 import LanguageSelector from './LanguageSelector';
 import type { Language } from '@/lib/translations';
 import { translations } from '@/lib/translations';
@@ -14,7 +15,10 @@ interface NavbarProps {
 
 export default function Navbar({ language, setLanguage }: NavbarProps) {
   const [open, setOpen] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
   const tr = translations[language];
+
+  useEffect(() => { setSignedIn(Boolean(getSession())); }, []);
 
   const navLinks = [
     { href: '/', label: tr['nav.home'] || 'Accueil' },
@@ -63,6 +67,15 @@ export default function Navbar({ language, setLanguage }: NavbarProps) {
           {/* Right Side */}
           <div className="flex items-center gap-3">
             <LanguageSelector language={language} setLanguage={setLanguage} />
+            {signedIn ? (
+              <Link href="/mon-espace" className="hidden sm:inline-flex items-center gap-1.5 nav-link">
+                <UserCircle2 className="w-4 h-4" /> Mon espace
+              </Link>
+            ) : (
+              <Link href="/login" className="hidden sm:inline-flex items-center gap-1.5 nav-link">
+                <LogIn className="w-4 h-4" /> Se connecter
+              </Link>
+            )}
             <Link
               href="/register"
               className="hidden sm:inline-flex btn-primary text-sm py-2 px-4"
@@ -84,6 +97,13 @@ export default function Navbar({ language, setLanguage }: NavbarProps) {
       {open && (
         <div className="lg:hidden border-t border-gray-200 bg-white shadow-lg">
           <div className="px-4 py-3 space-y-1">
+            <Link
+              href={signedIn ? '/mon-espace' : '/login'}
+              className="flex items-center gap-2 nav-link text-sm font-semibold text-drc-blue"
+              onClick={() => setOpen(false)}
+            >
+              {signedIn ? <><UserCircle2 className="w-4 h-4" /> Mon espace</> : <><LogIn className="w-4 h-4" /> Se connecter</>}
+            </Link>
             {navLinks.map(link => (
               <Link
                 key={link.href}

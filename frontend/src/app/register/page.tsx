@@ -5,6 +5,8 @@ import { humanFetch } from '@/lib/humanClient';
 import { trackRegistration } from '@/lib/analytics';
 import { CheckCircle, User, MapPin, BookOpen, Briefcase, Star, DollarSign, ChevronRight, ChevronLeft, AlertCircle, Rocket } from 'lucide-react';
 import { LAUNCH_LABEL_FR } from '@/lib/launch';
+import { saveSession } from '@/lib/memberSession';
+import Link from 'next/link';
 import { DRC_PROVINCES, CONTINENTS, AFRICAN_COUNTRIES } from '@/lib/provinces';
 
 type Step = 1 | 2 | 3 | 4 | 5 | 6;
@@ -168,11 +170,12 @@ export default function RegisterPage() {
         }),
       });
       // Persist the server-issued identity + session token so AI/ACU calls
-      // can authenticate the member (see lib/memberAuth.ts).
+      // can authenticate the member and they can return via /login → /mon-espace.
       try {
         const data = await res.json();
-        if (data?.memberId) localStorage.setItem('lcd_member_id', data.memberId);
-        if (data?.memberToken) localStorage.setItem('lcd_member_token', data.memberToken);
+        if (data?.memberId) {
+          saveSession({ memberId: data.memberId, memberToken: data.memberToken, firstName: form.firstName });
+        }
       } catch { /* non-JSON / queued */ }
     } catch {
       // offline or API down — registration UX continues
@@ -219,9 +222,12 @@ export default function RegisterPage() {
             <a href="/invite" className="inline-block bg-green-600 text-white font-bold px-5 py-2.5 rounded-lg text-sm hover:bg-green-700">Inviter mes proches sur WhatsApp</a>
           </div>
           <div className="flex gap-3 justify-center flex-wrap">
-            <a href="/dashboard" className="btn-primary text-sm">Accéder au tableau de bord</a>
+            <Link href="/mon-espace" className="btn-primary text-sm">Accéder à mon espace</Link>
             <a href="/training" className="border-2 border-drc-blue text-drc-blue px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-blue-50">Commencer la formation</a>
           </div>
+          <p className="text-xs text-gray-400 mt-4">
+            Astuce : vous pourrez revenir à tout moment via <Link href="/login" className="text-drc-blue font-semibold hover:underline">Se connecter</Link> (email ou téléphone).
+          </p>
         </div>
       </div>
     );
