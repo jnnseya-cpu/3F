@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { translations } from '@/lib/translations';
 import type { Language } from '@/lib/translations';
-import { DRC_PROVINCES, getTotalMembers, getTotalActiveContributors } from '@/lib/provinces';
+import { DRC_PROVINCES } from '@/lib/provinces';
 import LaunchCountdown from '@/components/LaunchCountdown';
 import FounderSection from '@/components/FounderSection';
 
@@ -50,9 +50,6 @@ export default function LandingPage() {
   const [activeLang] = useState<Language>('fr');
   const [activeSloganIdx, setActiveSloganIdx] = useState(0);
   const tr = translations[activeLang];
-
-  const totalMembers = getTotalMembers();
-  const totalContributors = getTotalActiveContributors();
 
   return (
     <div className="min-h-screen">
@@ -156,7 +153,7 @@ export default function LandingPage() {
             {[
               { label: 'Provinces couvertes', value: '26/26' },
               { label: 'Langues nationales', value: '5' },
-              { label: 'Agents IA actifs', value: '23' },
+              { label: 'Agents IA spécialisés', value: '23' },
               { label: 'Niveaux de structure', value: '7' },
             ].map((stat, i) => (
               <div key={stat.label} className={`text-center px-3 py-1 ${i > 0 ? 'md:border-l md:border-white/10' : ''}`}>
@@ -363,23 +360,22 @@ export default function LandingPage() {
                 <Globe className="w-5 h-5 text-drc-blue" /> 26 Provinces — Couverture nationale
               </h3>
               <div className="grid grid-cols-2 gap-2 max-h-[500px] overflow-y-auto scrollbar-thin pr-2">
-                {DRC_PROVINCES.map(province => (
-                  <div key={province.id} className="bg-white rounded-lg p-3 border border-gray-100 hover:border-drc-blue transition-colors">
-                    <p className="text-xs font-bold text-gray-900 truncate">{province.name}</p>
-                    <p className="text-xs text-gray-500">{province.capital}</p>
-                    <div className="mt-2 flex items-center justify-between">
-                      <span className="text-xs font-semibold text-drc-blue">
-                        {(province.memberCount || 0).toLocaleString()} membres
-                      </span>
-                      <div className="w-16 bg-gray-100 rounded-full h-1.5">
-                        <div
-                          className="h-1.5 bg-drc-blue rounded-full"
-                          style={{ width: `${province.electionReadiness || 0}%` }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                {DRC_PROVINCES.map(province => {
+                  const communes = province.territories.reduce((s, t) => s + t.communes.length, 0);
+                  return (
+                    <Link
+                      key={province.id}
+                      href={`/province/${province.id}`}
+                      className="bg-white rounded-lg p-3 border border-gray-100 hover:border-drc-blue hover:shadow-xs transition-all group"
+                    >
+                      <p className="text-xs font-bold text-gray-900 truncate group-hover:text-drc-blue transition-colors">{province.name}</p>
+                      <p className="text-xs text-gray-500">Chef-lieu : {province.capital}</p>
+                      <p className="mt-2 text-xs font-semibold text-drc-blue">
+                        {province.territories.length} territoires · {communes} communes
+                      </p>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           </div>
