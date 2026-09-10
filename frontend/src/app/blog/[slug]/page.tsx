@@ -22,6 +22,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
     description: post.description,
     keywords: post.keywords,
     alternates: { canonical: url },
+    authors: [{ name: post.author }],
     openGraph: {
       title: post.title,
       description: post.description,
@@ -30,7 +31,9 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
       locale,
       type: 'article',
       publishedTime: post.date,
+      modifiedTime: post.date,
       authors: [post.author],
+      tags: post.keywords,
     },
     twitter: {
       card: 'summary_large_image',
@@ -68,18 +71,52 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
     .map(slug => getPostBySlug(slug))
     .filter((p): p is NonNullable<typeof p> => Boolean(p));
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
-    headline: post.title,
-    description: post.description,
-    datePublished: post.date,
-    author: { '@type': 'Organization', name: post.author, url: BASE },
-    publisher: { '@type': 'Organization', name: "Le Congo D'Abord", url: BASE },
-    mainEntityOfPage: `${BASE}/blog/${post.slug}`,
-    keywords: post.keywords.join(', '),
-    inLanguage: post.lang || 'fr',
-  };
+  const url = `${BASE}/blog/${post.slug}`;
+  const wordCount = post.content.join(' ').split(/\s+/).filter(Boolean).length;
+
+  // Rich structured-data graph — wins AI answer engines (ChatGPT/Perplexity/
+  // Google AI Overviews) and rich results: Article + Breadcrumbs + FAQ + Speakable.
+  const graph: Record<string, unknown>[] = [
+    {
+      '@type': 'Article',
+      headline: post.title,
+      description: post.description,
+      datePublished: post.date,
+      dateModified: post.date,
+      author: { '@type': 'Organization', name: post.author, url: BASE },
+      publisher: {
+        '@type': 'Organization',
+        name: "Le Congo D'Abord",
+        url: BASE,
+        logo: { '@type': 'ImageObject', url: `${BASE}/icon-512.png` },
+      },
+      mainEntityOfPage: url,
+      keywords: post.keywords.join(', '),
+      articleSection: post.category,
+      wordCount,
+      inLanguage: post.lang || 'fr',
+      speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', 'article p'] },
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Accueil', item: BASE },
+        { '@type': 'ListItem', position: 2, name: 'Blog', item: `${BASE}/blog` },
+        { '@type': 'ListItem', position: 3, name: post.title, item: url },
+      ],
+    },
+  ];
+  if (post.faq && post.faq.length > 0) {
+    graph.push({
+      '@type': 'FAQPage',
+      mainEntity: post.faq.map(f => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    });
+  }
+  const jsonLd = { '@context': 'https://schema.org', '@graph': graph };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -104,6 +141,24 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
       <article className="max-w-3xl mx-auto px-4 py-10">
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
           {post.content.map((para, i) => renderParagraph(para, i))}
+
+          {/* FAQ — feeds FAQPage schema + AI answer engines; a strong ranking asset */}
+          {post.faq && post.faq.length > 0 && (
+            <section className="mt-10 pt-8 border-t border-gray-100">
+              <h2 className="font-black text-gray-900 text-xl mb-5">Questions fréquentes</h2>
+              <div className="space-y-3">
+                {post.faq.map((f, i) => (
+                  <details key={i} className="group rounded-xl border border-gray-200 bg-gray-50/60 p-4">
+                    <summary className="font-semibold text-gray-900 cursor-pointer list-none flex items-center justify-between gap-3">
+                      {f.q}
+                      <span className="text-drc-blue text-lg group-open:rotate-45 transition-transform">+</span>
+                    </summary>
+                    <p className="text-gray-600 text-sm leading-relaxed mt-3">{f.a}</p>
+                  </details>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Share — earns organic backlinks */}
           <div className="mt-8 pt-6 border-t border-gray-100">

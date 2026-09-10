@@ -41,20 +41,22 @@ const INTERNAL_LINKS = [
   '{les politiques publiques|/policy}',
 ];
 
-async function generateArticle(topic: string): Promise<{ title: string; description: string; keywords: string[]; content: string[] } | null> {
+async function generateArticle(topic: string): Promise<{ title: string; description: string; keywords: string[]; content: string[]; faq: { q: string; a: string }[] } | null> {
   const prompt = `Écris un article de blog SEO en français pour le parti politique congolais "Le Congo D'Abord" (premier parti propulsé par l'IA en RDC, fondé par Mr Justin Nseya).
 
 SUJET: ${topic}
 
-RÈGLES STRICTES:
-1. 5-7 paragraphes, ton professionnel et engageant, ancré dans le contexte RDC
-2. Insère naturellement AU MOINS 4 de ces liens internes (format exact {texte|/chemin}): ${INTERNAL_LINKS.join(', ')}
-3. Optimise pour les mots-clés de recherche congolais pertinents
-4. Termine par un appel à l'action vers {l'inscription|/register}
-5. AUCUNE fausse statistique sur le parti (pas de nombres de membres inventés)
+RÈGLES STRICTES (respecte EXACTEMENT pour un score SEO ≥ 90/100) :
+1. TITRE : entre 40 et 60 caractères, contenant le mot-clé principal.
+2. MÉTA-DESCRIPTION : entre 120 et 155 caractères, contenant aussi le mot-clé principal.
+3. CONTENU : 6 à 9 paragraphes, AU MOINS 350 mots au total, ton professionnel ancré dans le contexte RDC.
+4. LIENS INTERNES : insère naturellement AU MOINS 5 de ces liens (format exact {texte|/chemin}) : ${INTERNAL_LINKS.join(', ')}. Termine par {l'inscription|/register}.
+5. MOTS-CLÉS : 5 mots-clés de recherche congolais ; le 1er est le mot-clé principal (présent dans le titre ET la description).
+6. FAQ : 3 questions-réponses fréquentes et utiles (réponses de 2-3 phrases chacune).
+7. AUCUNE fausse statistique sur le parti (pas de nombres de membres inventés).
 
-Réponds UNIQUEMENT en JSON valide:
-{"title": "...", "description": "meta description 150-160 caractères", "keywords": ["mot1", "mot2", "mot3", "mot4", "mot5"], "content": ["paragraphe 1", "paragraphe 2", ...]}`;
+Réponds UNIQUEMENT en JSON valide :
+{"title": "...", "description": "...", "keywords": ["principal", "m2", "m3", "m4", "m5"], "content": ["paragraphe 1", "..."], "faq": [{"q": "...", "a": "..."}, {"q": "...", "a": "..."}, {"q": "...", "a": "..."}]}`;
 
   // Reuse the provider chain inline (Claude → OpenAI → Gemini)
   const providers: Array<() => Promise<string | null>> = [

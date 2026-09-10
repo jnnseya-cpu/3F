@@ -19,27 +19,35 @@ export interface BlogPost {
   related: string[]; // slugs — dynamic cross-linking between articles
   content: string[]; // paragraphs; {text|/path} tokens become hyperlinks
   lang?: 'fr' | 'ln' | 'sw'; // language code (defaults to fr) for hreflang/JSON-LD
+  faq?: { q: string; a: string }[]; // powers the FAQ section + FAQPage schema (AI answers, rich results)
 }
 
 export const BLOG_POSTS: BlogPost[] = [
   {
     slug: 'parti-politique-ia-rdc',
-    title: "Le premier parti politique propulsé par l'IA en RDC : comment ça marche",
+    title: "Parti politique IA en RDC : comment ça fonctionne",
     description:
-      "Découvrez comment Le Congo D'Abord utilise 23 agents d'intelligence artificielle pour transformer la politique congolaise : sélection des candidats au mérite, transparence financière totale et projets nationaux suivis en temps réel.",
+      "Le Congo D'Abord est le premier parti politique congolais propulsé par l'IA : sélection au mérite, transparence totale et 23 agents au travail 24h/24.",
     keywords: ['parti politique RDC', 'intelligence artificielle Congo', 'politique congolaise', 'Congo D\'Abord', 'IA Afrique'],
     date: '2026-08-01',
     author: 'Le Congo D\'Abord',
     category: 'Innovation',
     readMinutes: 6,
-    related: ['selection-candidats-merite', 'transparence-cotisations'],
+    related: ['selection-candidats-merite', 'transparence-cotisations', 'snto-promesses-projets'],
     content: [
-      "La République Démocratique du Congo entre dans une nouvelle ère politique. {Le Congo D'Abord|/} est le premier parti politique congolais dirigé par des citoyens et renforcé par l'intelligence artificielle — pas comme un slogan, mais comme une infrastructure réelle qui fonctionne aujourd'hui.",
-      "Concrètement, {23 agents IA spécialisés|/projects} travaillent pour le parti 24 heures sur 24 : validation des {inscriptions de membres|/register}, cartographie des adhérents dans les 26 provinces, {analyse des CV et sélection des candidats|/candidates}, génération de {politiques publiques|/policy}, priorisation des {besoins d'infrastructure|/infrastructure} signalés par les citoyens, et bien plus.",
-      "Le principe fondamental ne change jamais : l'IA propose, les humains décident. Aucune décision finale n'est prise par une machine. L'intelligence artificielle élimine le favoritisme et l'arbitraire — les organes du parti gardent le pouvoir de décision.",
-      "Chaque membre est enregistré dans une structure à 7 niveaux, du village jusqu'à la présidence, en passant par les territoires, communes et quartiers. La diaspora congolaise d'Afrique, d'Europe, des Amériques et d'Asie est pleinement intégrée. Consultez le {tableau de bord national|/dashboard} pour voir la structure en action.",
-      "Et parce que la confiance se mérite, toutes les données sensibles des membres sont protégées par un chiffrement AES-256 de niveau bancaire — le même standard que les institutions financières internationales.",
-      "Rejoignez le mouvement dès aujourd'hui : {inscrivez-vous en 6 étapes simples|/register} et devenez acteur de la transformation nationale.",
+      "La République Démocratique du Congo entre dans une nouvelle ère politique. {Le Congo D'Abord|/} est le premier parti politique congolais dirigé par des citoyens et renforcé par l'intelligence artificielle — pas comme un slogan de campagne, mais comme une infrastructure réelle qui fonctionne aujourd'hui, ouverte et vérifiable par tous.",
+      "Pendant des décennies, la politique congolaise a fonctionné à l'envers : l'argent achetait les candidatures, la tribu décidait des postes, et les promesses s'évaporaient une fois le pouvoir atteint. Un parti bâti autour de l'IA renverse cette logique parce que la machine applique la même règle à tout le monde, sans favoritisme ni passe-droit.",
+      "Concrètement, {23 agents IA spécialisés|/projects} travaillent pour le parti 24 heures sur 24 : validation des {inscriptions de membres|/register}, cartographie des adhérents dans les 26 provinces, {analyse des profils et sélection des candidats|/candidates}, génération de {politiques publiques|/policy}, priorisation des {besoins d'infrastructure|/infrastructure} signalés par les citoyens, et suivi des projets nationaux via le {système SNTO|/projects}.",
+      "Le principe fondamental ne change jamais : l'IA propose, les humains décident. Aucune décision finale n'est prise par une machine. L'intelligence artificielle élimine le favoritisme et l'arbitraire, mais les organes élus du parti gardent seuls le pouvoir de décision — la technologie est un garde-fou anti-corruption, pas un dirigeant.",
+      "Chaque membre est enregistré dans une structure à 7 niveaux, du village jusqu'à la présidence, en passant par les territoires, communes et quartiers. Où que vous viviez, vous avez une place et une voix. La diaspora congolaise d'Afrique, d'Europe, des Amériques et d'Asie est pleinement intégrée. Consultez le {tableau de bord national|/dashboard} pour voir la structure en action.",
+      "La confiance se mérite. C'est pourquoi chaque cotisation entre dans un {registre public|/contributions} — pas de caisse noire — et pourquoi les données sensibles des membres sont protégées par un chiffrement AES-256 de niveau bancaire. Vous pouvez vérifier nos engagements sur la page {comment nous tenons nos promesses|/promesses}.",
+      "L'adhésion est entièrement gratuite. Vous ne cotisez — un dollar par mois — que lorsque vous le décidez, et vous voyez exactement où va cet argent. C'est ainsi qu'un parti redevient la propriété de ses membres plutôt que de ses financiers.",
+      "Rejoignez le mouvement dès aujourd'hui : {inscrivez-vous en 6 étapes simples|/register} et devenez acteur de la transformation nationale du Congo.",
+    ],
+    faq: [
+      { q: "Est-ce une intelligence artificielle qui dirige le parti ?", a: "Non. L'IA analyse, propose et rend le favoritisme impossible, mais toutes les décisions finales appartiennent aux organes élus du parti. La règle est simple : l'IA propose, les humains décident." },
+      { q: "Combien coûte l'adhésion au Congo D'Abord ?", a: "L'adhésion est gratuite. La cotisation est volontaire : 1 USD par mois ou 12 USD par an, payable par mobile money, et chaque franc est suivi dans un registre public." },
+      { q: "Comment l'IA empêche-t-elle la corruption ?", a: "Les candidats sont classés par une formule de mérite publique et identique pour tous, et les cotisations sont tracées publiquement. Ni l'argent, ni la tribu, ni le piston ne peuvent modifier un score ou dissimuler un flux financier." },
     ],
   },
   {
