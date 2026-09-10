@@ -65,7 +65,7 @@ Member: `/login` · `/mon-espace` (session-based return + contribution front doo
 | Payments | BitriPay checkout + webhook + ACU credit | `api/payments/*` |
 | Member store | Firebase Firestore registration | `api/members/register` |
 | Growth Engine | 10 marketing tools | `lib/growthTools.ts`, `/growth` |
-| SEO engine | 35 blog articles (FR/Lingala/Swahili) + 26 province pages, JSON-LD, sitemap, robots | `lib/blogPosts.ts`, `/blog`, `/province`, `sitemap.ts`, `robots.ts` |
+| SEO engine | 35 blog articles + 26 province pages. **All 26 FR articles score ≥90/100** (title/desc lengths, keyword placement, 350+ words, 6+ dynamic internal links, 3-Q FAQ each). Rich JSON-LD @graph (Article+Breadcrumb+FAQPage+Speakable), `/llms.txt` for AI engines, sitemap, robots. The 9 Lingala/Swahili articles need native expansion — see `docs/blog-native-review.md`. | `lib/blogPosts.ts`, `lib/seoScore.ts`, `/blog`, `/province`, `sitemap.ts`, `robots.ts`, `app/llms.txt` |
 | SEO autopilot | Daily cron writes 1 article | `api/seo/autopilot`, `vercel.json` crons |
 | Referral loop | WhatsApp invite + tracking | `/invite`, `api/referral/track` |
 | Weekly newsletter | Cron sends feature-selling email (12-link grid + spotlight + latest articles) to all opted-in members; HMAC one-click unsubscribe; idempotent per ISO-week | `lib/newsletter.ts`, `api/newsletter/*`, `vercel.json` crons |
