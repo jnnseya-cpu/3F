@@ -25,7 +25,10 @@ const INTERNAL_LINK_RE = /\{[^|]+\|\/[^}]+\}/g;
 export function computeSeoScore(post: BlogPost): SeoResult {
   const titleLen = post.title.length;
   const descLen = post.description.length;
-  const wordCount = post.content.join(' ').split(/\s+/).filter(Boolean).length;
+  // FAQ answers render on the page as genuine article content, so they count
+  // toward word count (and help win FAQ-rich results / AI answers).
+  const faqText = (post.faq || []).map(f => `${f.q} ${f.a}`).join(' ');
+  const wordCount = `${post.content.join(' ')} ${faqText}`.split(/\s+/).filter(Boolean).length;
   const internalLinks = post.content.join(' ').match(INTERNAL_LINK_RE)?.length ?? 0;
   const firstKeyword = (post.keywords[0] || '').toLowerCase();
   const keywordInTitle = !!firstKeyword && post.title.toLowerCase().includes(firstKeyword.split(' ')[0]);
