@@ -1,20 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Brain, FileText, TrendingUp, Globe, Zap, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
+import { Brain, FileText, Zap, BookOpen } from 'lucide-react';
 import AIAgentPanel from '@/components/AIAgentPanel';
-import { MOCK_POLICY_PROPOSALS } from '@/lib/mockData';
+import PreLaunchState from '@/components/PreLaunchState';
 
 const CATEGORIES = ['Tous', 'Énergie', 'Technologie', 'Agriculture', 'Santé', 'Éducation', 'Sécurité', 'Économie'];
 
 export default function PolicyPage() {
   const [activeTab, setActiveTab] = useState<'proposals' | 'generate' | 'ai'>('proposals');
-  const [selectedCategory, setSelectedCategory] = useState('Tous');
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-
-  const filtered = MOCK_POLICY_PROPOSALS.filter(
-    p => selectedCategory === 'Tous' || p.category === selectedCategory
-  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -55,82 +49,10 @@ export default function PolicyPage() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {activeTab === 'proposals' && (
-          <div>
-            {/* Category Filter */}
-            <div className="flex gap-2 flex-wrap mb-6">
-              {CATEGORIES.map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                    selectedCategory === cat ? 'bg-drc-blue text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-
-            <div className="space-y-4">
-              {filtered.map(proposal => (
-                <div key={proposal.id} className="card hover:shadow-md transition-all duration-200">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs bg-drc-blue/10 text-drc-blue px-2 py-0.5 rounded-full font-semibold">
-                          {proposal.category}
-                        </span>
-                        <span className="text-xs text-gray-400">
-                          {new Date(proposal.createdAt).toLocaleDateString('fr-FR')}
-                        </span>
-                      </div>
-                      <h3 className="font-bold text-gray-900 text-lg mb-2">{proposal.title}</h3>
-                      <p className="text-gray-600 text-sm leading-relaxed">{proposal.description}</p>
-                    </div>
-                    <button
-                      onClick={() => setExpandedId(expandedId === proposal.id ? null : proposal.id)}
-                      className="text-gray-400 hover:text-drc-blue transition-colors shrink-0"
-                    >
-                      {expandedId === proposal.id ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                    </button>
-                  </div>
-
-                  {expandedId === proposal.id && (
-                    <div className="mt-4 pt-4 border-t border-gray-100 space-y-3">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="p-3 bg-blue-50 rounded-xl border border-blue-100">
-                          <p className="text-xs font-semibold text-blue-700 mb-1 flex items-center gap-1">
-                            <Globe className="w-3.5 h-3.5" /> Bénéficiaires cibles
-                          </p>
-                          <p className="text-sm text-gray-700">{proposal.targetBeneficiaries}</p>
-                        </div>
-                        <div className="p-3 bg-blue-50 rounded-xl border border-blue-100">
-                          <p className="text-xs font-semibold text-green-700 mb-1 flex items-center gap-1">
-                            <TrendingUp className="w-3.5 h-3.5" /> Impact estimé
-                          </p>
-                          <p className="text-sm text-gray-700">{proposal.estimatedImpact}</p>
-                        </div>
-                      </div>
-                      {proposal.aiSummary && (
-                        <div className="p-4 bg-purple-50 rounded-xl border border-purple-100">
-                          <p className="text-xs font-semibold text-purple-700 mb-2 flex items-center gap-1">
-                            <Brain className="w-3.5 h-3.5" /> Analyse & Recommandation IA
-                          </p>
-                          <p className="text-sm text-gray-700">{proposal.aiSummary}</p>
-                        </div>
-                      )}
-                      <div className="flex gap-2">
-                        <button className="btn-primary text-sm py-2">Adopter cette politique</button>
-                        <button className="border border-drc-blue text-drc-blue px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors">
-                          Approfondir l'analyse IA
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
+          <PreLaunchState
+            title="Propositions de politiques — à venir"
+            message="Les propositions de politiques publiques adoptées par le parti seront publiées ici. En attendant, utilisez l'onglet « Générer une Politique » ou l'Agent Politique IA pour produire une analyse."
+          />
         )}
 
         {activeTab === 'generate' && (

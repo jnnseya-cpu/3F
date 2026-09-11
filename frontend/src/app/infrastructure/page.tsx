@@ -1,10 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import DemoDataBanner from '@/components/DemoDataBanner';
 import { Map, AlertTriangle, Zap, Droplets, Navigation, Heart, BookOpen, Wifi, Leaf, Brain } from 'lucide-react';
 import AIAgentPanel from '@/components/AIAgentPanel';
-import { MOCK_INFRASTRUCTURE_NEEDS } from '@/lib/mockData';
+import PreLaunchState from '@/components/PreLaunchState';
 import type { InfrastructureNeed } from '@/lib/types';
 
 const CATEGORY_ICONS: Record<InfrastructureNeed['category'], React.FC<{className?: string}>> = {
@@ -26,21 +25,9 @@ const SEVERITY_CONFIG = {
 
 export default function InfrastructurePage() {
   const [activeTab, setActiveTab] = useState<'map' | 'list' | 'ai'>('list');
-  const [severityFilter, setSeverityFilter] = useState<InfrastructureNeed['severity'] | 'all'>('all');
-  const [categoryFilter, setCategoryFilter] = useState<InfrastructureNeed['category'] | 'all'>('all');
-
-  const filtered = MOCK_INFRASTRUCTURE_NEEDS.filter(n => {
-    const matchSev = severityFilter === 'all' || n.severity === severityFilter;
-    const matchCat = categoryFilter === 'all' || n.category === categoryFilter;
-    return matchSev && matchCat;
-  });
-
-  const criticalCount = MOCK_INFRASTRUCTURE_NEEDS.filter(n => n.severity === 'Critical').length;
-  const totalAffected = MOCK_INFRASTRUCTURE_NEEDS.reduce((s, n) => s + n.populationAffected, 0);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DemoDataBanner />
       <div className="bg-drc-blue text-white">
         <div className="flag-stripe" />
         <div className="max-w-7xl mx-auto px-4 py-6">
@@ -50,16 +37,6 @@ export default function InfrastructurePage() {
                 <Map className="w-7 h-7 text-drc-yellow" /> Cartographie des Besoins en Infrastructure
               </h1>
               <p className="text-blue-200 text-sm mt-1">Identification et priorisation par l'Agent Infrastructure IA</p>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-white/10 rounded-lg px-4 py-2 text-center">
-                <p className="text-drc-yellow font-black text-xl">{criticalCount}</p>
-                <p className="text-blue-200 text-xs">Besoins critiques</p>
-              </div>
-              <div className="bg-white/10 rounded-lg px-4 py-2 text-center">
-                <p className="text-drc-yellow font-black text-xl">{(totalAffected / 1000000).toFixed(1)}M</p>
-                <p className="text-blue-200 text-xs">Personnes affectées</p>
-              </div>
             </div>
           </div>
         </div>
@@ -91,99 +68,10 @@ export default function InfrastructurePage() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {activeTab === 'list' && (
-          <div>
-            {/* Filters */}
-            <div className="flex gap-4 flex-wrap mb-6">
-              <div>
-                <p className="text-xs text-gray-500 mb-1 font-semibold uppercase">Sévérité</p>
-                <div className="flex gap-1">
-                  {(['all', 'Critical', 'High', 'Medium', 'Low'] as const).map(s => (
-                    <button
-                      key={s}
-                      onClick={() => setSeverityFilter(s)}
-                      className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
-                        severityFilter === s ? 'bg-drc-blue text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      }`}
-                    >
-                      {s === 'all' ? 'Tous' : s === 'Critical' ? 'Critique' : s === 'High' ? 'Élevé' : s === 'Medium' ? 'Moyen' : 'Faible'}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 mb-1 font-semibold uppercase">Catégorie</p>
-                <div className="flex gap-1 flex-wrap">
-                  {(['all', 'Water', 'Electricity', 'Roads', 'Healthcare', 'Education', 'Internet', 'Agriculture'] as const).map(c => (
-                    <button
-                      key={c}
-                      onClick={() => setCategoryFilter(c)}
-                      className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
-                        categoryFilter === c ? 'bg-drc-blue text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      }`}
-                    >
-                      {c === 'all' ? 'Tout' : c}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Needs Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {filtered.map(need => {
-                const Icon = CATEGORY_ICONS[need.category] || Map;
-                const sevConfig = SEVERITY_CONFIG[need.severity];
-                return (
-                  <div key={need.id} className={`card border-l-4 ${sevConfig.border} hover:shadow-md transition-shadow`}>
-                    <div className="flex items-start justify-between gap-3 mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl ${sevConfig.bg} flex items-center justify-center shrink-0`}>
-                          <Icon className={`w-5 h-5 ${sevConfig.text}`} />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${sevConfig.bg} ${sevConfig.text}`}>
-                              {sevConfig.label}
-                            </span>
-                            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{need.category}</span>
-                          </div>
-                          <h3 className="font-bold text-gray-900 mt-1">{need.province}{need.territory ? ` — ${need.territory}` : ''}</h3>
-                        </div>
-                      </div>
-                    </div>
-
-                    <p className="text-gray-600 text-sm mb-4 leading-relaxed">{need.description}</p>
-
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div className="bg-gray-50 rounded-lg p-2 text-center">
-                        <p className="font-black text-gray-900">{(need.populationAffected / 1000).toFixed(0)}K</p>
-                        <p className="text-xs text-gray-500">Personnes affectées</p>
-                      </div>
-                      {need.estimatedCost && (
-                        <div className="bg-gray-50 rounded-lg p-2 text-center">
-                          <p className="font-black text-gray-900">${(need.estimatedCost / 1000000).toFixed(1)}M</p>
-                          <p className="text-xs text-gray-500">Coût estimé</p>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="mt-4 pt-3 border-t border-gray-100 flex gap-2">
-                      <button className="text-xs text-drc-blue font-semibold hover:underline">
-                        Créer une proposition politique →
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-
-              {filtered.length === 0 && (
-                <div className="col-span-2 text-center py-16 text-gray-400">
-                  <Map className="w-16 h-16 mx-auto mb-3 opacity-30" />
-                  <p>Aucun besoin trouvé pour ces filtres</p>
-                </div>
-              )}
-            </div>
-          </div>
+          <PreLaunchState
+            title="Besoins d'infrastructure — à signaler"
+            message="Les besoins signalés par les membres (routes, eau, écoles, santé…) apparaîtront ici, classés par gravité, une fois les inscriptions ouvertes. Utilisez l'Agent Infrastructure IA pour une analyse immédiate."
+          />
         )}
 
         {activeTab === 'ai' && (
@@ -198,16 +86,13 @@ export default function InfrastructurePage() {
               <div className="grid grid-cols-2 gap-3">
                 {(['Water', 'Electricity', 'Roads', 'Healthcare', 'Education', 'Internet'] as const).map(cat => {
                   const Icon = CATEGORY_ICONS[cat];
-                  const count = MOCK_INFRASTRUCTURE_NEEDS.filter(n => n.category === cat).length;
-                  const hasCritical = MOCK_INFRASTRUCTURE_NEEDS.some(n => n.category === cat && n.severity === 'Critical');
                   return (
-                    <div key={cat} className={`p-3 rounded-xl border ${hasCritical ? 'border-red-200 bg-red-50' : 'border-gray-100 bg-white'}`}>
+                    <div key={cat} className="p-3 rounded-xl border border-gray-100 bg-white">
                       <div className="flex items-center gap-2 mb-2">
-                        <Icon className={`w-4 h-4 ${hasCritical ? 'text-red-500' : 'text-drc-blue'}`} />
+                        <Icon className="w-4 h-4 text-drc-blue" />
                         <span className="text-xs font-semibold text-gray-700">{cat}</span>
                       </div>
-                      <p className={`text-2xl font-black ${hasCritical ? 'text-red-600' : 'text-gray-900'}`}>{count}</p>
-                      <p className="text-xs text-gray-400">besoins identifiés</p>
+                      <p className="text-xs text-gray-400">Analysé par l'agent IA</p>
                     </div>
                   );
                 })}

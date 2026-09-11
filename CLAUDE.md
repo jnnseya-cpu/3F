@@ -43,7 +43,7 @@ repetition + zero regressions + production-grade stability.
 
 ## Consistency
 - Single source of truth for changeable values — don't scatter `$1`, `5 ACUs`, `#007FFF`.
-  Party constants live in `shared/constants.ts` and `lib/*`.
+  Party constants live in `lib/*` (e.g. `lib/plans.ts`, `lib/launch.ts`, `lib/founder.ts`).
 - One design system. One API convention. No duplicate `UserService`/`user-service` clones.
 - Strict types. No `any` / `@ts-ignore` to hide real errors — fix the type.
 - No placeholder/fake data presented as a finished feature. No dead code left behind.

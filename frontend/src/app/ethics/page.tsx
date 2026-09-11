@@ -1,10 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import DemoDataBanner from '@/components/DemoDataBanner';
 import { Shield, AlertTriangle, CheckCircle, Clock, FileText, Brain, Users } from 'lucide-react';
 import AIAgentPanel from '@/components/AIAgentPanel';
-import { MOCK_ETHICS_CASES } from '@/lib/mockData';
+import PreLaunchState from '@/components/PreLaunchState';
 import type { EthicsCase } from '@/lib/types';
 
 const STATUS_CONFIG: Record<EthicsCase['status'], { bg: string; text: string; label: string; icon: React.FC<{className?: string}> }> = {
@@ -25,14 +24,10 @@ const TYPE_LABELS: Record<EthicsCase['type'], string> = {
 
 export default function EthicsPage() {
   const [activeTab, setActiveTab] = useState<'cases' | 'report' | 'charter' | 'ai'>('cases');
-  const [showReportForm, setShowReportForm] = useState(false);
 
-  const openCases = MOCK_ETHICS_CASES.filter(c => c.status === 'Open' || c.status === 'Under Investigation').length;
-  const resolvedCases = MOCK_ETHICS_CASES.filter(c => c.status === 'Resolved').length;
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DemoDataBanner />
       <div className="bg-drc-blue text-white">
         <div className="flag-stripe" />
         <div className="max-w-7xl mx-auto px-4 py-6">
@@ -42,16 +37,6 @@ export default function EthicsPage() {
                 <Shield className="w-7 h-7 text-drc-yellow" /> Commission Éthique et Discipline
               </h1>
               <p className="text-blue-200 text-sm mt-1">Intégrité, transparence et responsabilité partisane</p>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-white/10 rounded-lg px-4 py-2 text-center">
-                <p className="text-drc-yellow font-black text-xl">{openCases}</p>
-                <p className="text-blue-200 text-xs">Cas actifs</p>
-              </div>
-              <div className="bg-white/10 rounded-lg px-4 py-2 text-center">
-                <p className="text-blue-300 font-black text-xl">{resolvedCases}</p>
-                <p className="text-blue-200 text-xs">Résolus</p>
-              </div>
             </div>
           </div>
         </div>
@@ -85,76 +70,10 @@ export default function EthicsPage() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {activeTab === 'cases' && (
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Dossiers Éthiques Actifs</h2>
-              <button
-                onClick={() => setActiveTab('report')}
-                className="btn-primary text-sm flex items-center gap-2"
-              >
-                <AlertTriangle className="w-4 h-4" /> Signaler un cas
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {MOCK_ETHICS_CASES.map(c => {
-                const statusConf = STATUS_CONFIG[c.status];
-                const StatusIcon = statusConf.icon;
-                return (
-                  <div key={c.id} className="card hover:shadow-md transition-shadow">
-                    <div className="flex items-start justify-between gap-4 mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl ${statusConf.bg} flex items-center justify-center shrink-0`}>
-                          <StatusIcon className={`w-5 h-5 ${statusConf.text}`} />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${statusConf.bg} ${statusConf.text}`}>
-                              {statusConf.label}
-                            </span>
-                            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                              {TYPE_LABELS[c.type]}
-                            </span>
-                            <span className="text-xs text-gray-400">
-                              Signalé le {new Date(c.reportedAt).toLocaleDateString('fr-FR')}
-                            </span>
-                          </div>
-                          <p className="text-xs text-gray-500 mt-0.5">Dossier #{c.id.toUpperCase()}</p>
-                        </div>
-                      </div>
-                      {c.impactOnScore !== 0 && (
-                        <div className="text-right shrink-0">
-                          <p className="text-sm font-bold text-drc-red">{c.impactOnScore} pts</p>
-                          <p className="text-xs text-gray-400">Impact score</p>
-                        </div>
-                      )}
-                    </div>
-
-                    <p className="text-gray-700 text-sm mb-3">{c.description}</p>
-
-                    {c.resolution && (
-                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
-                        <p className="text-xs font-semibold text-green-700 mb-1">Résolution</p>
-                        <p className="text-sm text-gray-700">{c.resolution}</p>
-                      </div>
-                    )}
-
-                    <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-400">
-                      <div className="flex items-center gap-1">
-                        <Users className="w-3.5 h-3.5" />
-                        <span>Identité du membre protégée selon procédure</span>
-                      </div>
-                      {c.status !== 'Resolved' && c.status !== 'Dismissed' && (
-                        <button className="text-drc-blue font-semibold hover:underline">
-                          Voir détails →
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          <PreLaunchState
+            title="Dossiers éthiques — aucun cas public"
+            message="Les dossiers éthiques et disciplinaires apparaîtront ici une fois la commission active. Pour signaler un manquement, utilisez l'onglet « Signaler »."
+          />
         )}
 
         {activeTab === 'report' && (

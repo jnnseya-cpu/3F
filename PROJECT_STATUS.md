@@ -12,7 +12,9 @@ homepage hero (`components/LaunchCountdown.tsx`).
 
 ## Repo & structure
 - GitHub: `jnnseya-cpu/3F`, branch `claude/gracious-allen-WiiR5`
-- Monorepo: `frontend/` (Next.js 14, the live app) · `backend/` (FastAPI, 23 agents) · `shared/` · `database/`
+- Single app: `frontend/` (Next.js 14 — the whole product). The former
+  `backend/` (FastAPI), `database/`, `shared/` and Docker stack were removed
+  (App Hosting is the single runtime; nothing imported them).
 - The **frontend** is the deployable product. **Deploy target: Firebase App Hosting**
   (root dir = `frontend`; config in `frontend/apphosting.yaml`, `firebase.json`,
   `.firebaserc`, `storage.rules`). See `DEPLOYMENT.md` for the full readiness report
@@ -48,30 +50,29 @@ Member: `/login` · `/mon-espace` (session-based return + contribution front doo
   individual cotisations are private by design. Remaining illustrative charts are
   now clearly labelled **projections**, never past-tense fact.
 
-## API routes (17 — all ✅)
+## API routes (16 — all ✅)
 `/api/members/login` · `/api/members/me` · `/api/contributions/ledger` (added) ·
 `/api/agents/chat` · `/api/growth/generate` · `/api/members/register`
 `/api/payments/checkout` · `/api/payments/webhook` · `/api/acu/balance`
 `/api/referral/track` · `/api/security/challenge` · `/api/security/sentinel`
 `/api/seo/autopilot` · `/api/newsletter/send` · `/api/newsletter/unsubscribe` · `/api/blog/views`
-· `/api/auth/[...nextauth]`
 
 ## Systems built (✅ — each done once, do not repeat)
 | System | What it does | File(s) |
 |---|---|---|
-| 23 AI agents | 12 party + 11 SNTO, via chat panels | `backend/ai/agents.py`, agent panels |
+| 23 AI agents | 12 party + 11 SNTO, via chat panels | `lib/*`, agent panels |
 | AI router | Claude→OpenAI→Gemini fallback | `api/agents/chat`, `api/growth/generate` |
 | ACU metering | Every AI action costs credits, no free AI | `lib/acu.ts` |
 | Sentinel security | Human-only gate + bot/injection blocking | `lib/sentinel.ts`, `lib/guard.ts`, `lib/humanClient.ts` |
-| Encryption | AES-256 field encryption + headers | `lib/crypto.ts`, `backend/security.py` |
+| Encryption | AES-256 field encryption + headers | `lib/crypto.ts`, `lib/sentinel.ts` |
 | Rate limiting | Per-IP throttling | `lib/rateLimit.ts` |
 | Payments | BitriPay checkout + webhook + ACU credit | `api/payments/*` |
 | Member store | Firebase Firestore registration | `api/members/register` |
 | Growth Engine | 10 marketing tools | `lib/growthTools.ts`, `/growth` |
 | SEO engine | 35 blog articles + 26 province pages. **All 26 FR articles score ≥90/100** (title/desc lengths, keyword placement, 350+ words, 6+ dynamic internal links, 3-Q FAQ each). Rich JSON-LD @graph (Article+Breadcrumb+FAQPage+Speakable), `/llms.txt` for AI engines, sitemap, robots. The 9 Lingala/Swahili articles need native expansion — see `docs/blog-native-review.md`. | `lib/blogPosts.ts`, `lib/seoScore.ts`, `/blog`, `/province`, `sitemap.ts`, `robots.ts`, `app/llms.txt` |
-| SEO autopilot | Daily cron writes 1 article | `api/seo/autopilot`, `vercel.json` crons |
+| SEO autopilot | Daily cron writes 1 article | `api/seo/autopilot` (Cloud Scheduler) |
 | Referral loop | WhatsApp invite + tracking | `/invite`, `api/referral/track` |
-| Weekly newsletter | Cron sends feature-selling email (12-link grid + spotlight + latest articles) to all opted-in members; HMAC one-click unsubscribe; idempotent per ISO-week | `lib/newsletter.ts`, `api/newsletter/*`, `vercel.json` crons |
+| Weekly newsletter | Cron sends feature-selling email (12-link grid + spotlight + latest articles) to all opted-in members; HMAC one-click unsubscribe; idempotent per ISO-week | `lib/newsletter.ts`, `api/newsletter/*` (Cloud Scheduler) |
 | Blog view counter | Per-article views: atomic Firestore increment (race-safe), bot-filtered + rate-limited + slug-validated; client dedupes per browser via localStorage; hidden until a real count exists (no fabricated numbers) | `api/blog/views`, `components/BlogViews.tsx`, `blog/[slug]/page.tsx` |
 | SEO score | Per-article on-page SEO score (0–100 + grade) computed from the article's own content — title/meta length, keyword usage, word count, internal links, cross-links; renders instantly server-side, no external service. Expandable check-by-check panel on each article. | `lib/seoScore.ts`, `components/SeoScorePanel.tsx`, `blog/[slug]/page.tsx` |
 | Analytics | Meta Pixel + Google tag fired site-wide via one shared tracker: page_view on every route + conversion events (registration, AI chat, growth tools, referral share); env-gated, no-op when unset; CSP allowlisted | `lib/analytics.ts`, `components/AnalyticsScripts.tsx`, `components/PageViewTracker.tsx` |
@@ -162,16 +163,14 @@ Media/CDN and push notifications are **covered by Firebase** (Storage + FCM) —
   switcher didn't change page content (the landing was locked to French).
 - No native mobile app / offline mode (web only, but installable PWA).
 - No CENI voter-file integration.
-- **Auth is dormant scaffolding.** `/api/auth/[...nextauth]` holds a single demo
-  credential and is NOT used by any page (no `useSession`/`SessionProvider`, no
-  `/login` page, no protected routes). Real auth arrives with Firebase near launch.
-- **`backend/` (FastAPI) is not wired to the deployed frontend.** The frontend is
-  self-contained: it calls its own `frontend/src/app/api/*` routes, which talk to
-  Anthropic/OpenAI/Gemini/Firebase/BitriPay directly. `backend/` is kept as the
-  reference implementation of the 23 agents for a future scale-out; it is NOT dead
-  by accident — do not delete without deciding the scale-out story.
-- Dashboards/contributions/candidates/infrastructure/ethics show illustrative demo
-  data, each wrapped in `<DemoDataBanner/>`. Real data replaces it once Firebase is live.
+- **Auth**: real member flow (`/register` → `/login` → `/mon-espace`) with a signed
+  member token (`lib/memberAuth.ts`); OTP-based secure re-auth arrives with the SMS
+  provider. The old dormant NextAuth route was removed. Session lookup needs Firebase.
+- **Demo data removed.** The demo dashboards (`/dashboard`, `/dashboard/provincial`,
+  `/dashboard/local`, `/ethics`, `/infrastructure`, `/policy`) now render an honest
+  **pre-launch empty state** (`components/PreLaunchState.tsx`) instead of illustrative
+  data; `lib/mockData.ts` deleted. `/candidates` keeps clearly-illustrative "Profil
+  exemple" profiles to demonstrate the scoring mechanism (not real people).
 
 ## Financial integrity (money path — hardened)
 The money path is: BitriPay checkout → webhook → member activation + ACU credit → ACU debit on each AI action. Closed loss vectors:

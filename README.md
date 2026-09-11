@@ -36,16 +36,18 @@ cdp-ai-os/
 │   │   ├── policy/               # Policy Intelligence
 │   │   ├── infrastructure/       # Infrastructure needs
 │   │   └── ethics/               # Ethics & discipline
+│   │   └── api/                  # Server routes (AI, payments, members, SEO…)
 │   ├── components/               # Reusable React components
-│   └── lib/                      # Utilities, types, data
-├── backend/                      # FastAPI Python backend
-│   ├── main.py                   # App entry point
-│   ├── models/                   # SQLAlchemy models
-│   ├── routers/                  # API endpoints
-│   └── ai/                       # Claude AI agents
-├── database/                     # PostgreSQL schema
-└── docker-compose.yml            # Full stack deployment
+│   ├── lib/                      # Utilities, types, data, crypto, auth
+│   └── apphosting.yaml           # Firebase App Hosting runtime config
+├── firebase.json                 # Firestore + Storage rules refs
+├── firestore.rules · storage.rules
+└── DEPLOYMENT.md                 # Production readiness + deploy steps
 ```
+
+> Single self-contained Next.js app deployed on **Firebase App Hosting**. Server
+> routes under `frontend/src/app/api/*` call Anthropic/OpenAI/Gemini, Firebase
+> (Admin SDK) and the payment gateway directly — no separate backend service.
 
 ## 12 Agents IA / 12 AI Agents
 
@@ -75,25 +77,19 @@ Score Total = (Éducation × 0.15) + (Expérience × 0.20) + (Crédibilité loca
 ## Installation Rapide / Quick Start
 
 ```bash
-# 1. Clone and setup
-cp .env.example .env.local
-# Fill in ANTHROPIC_API_KEY and other values
-
-# 2. Start with Docker
-docker-compose up -d
-
-# 3. Or run locally
-npm install && npm run dev          # Frontend: http://localhost:3000
-cd backend && pip install -r requirements.txt && python main.py  # Backend: http://localhost:8000
+cd frontend
+cp .env.example .env.local     # fill in values (all optional for local dev)
+npm install
+npm run dev                    # http://localhost:3000
 ```
 
 ## Stack Technique
 
-- **Frontend**: Next.js 14 (App Router) + TypeScript + Tailwind CSS
-- **Backend**: FastAPI (Python 3.11)
-- **Database**: PostgreSQL 16
-- **AI**: Anthropic Claude claude-sonnet-4-6
-- **Auth**: NextAuth.js
+- **Frontend/App**: Next.js 14 (App Router, SSR) + TypeScript + Tailwind CSS
+- **Hosting**: Firebase App Hosting (see `DEPLOYMENT.md`)
+- **Data**: Cloud Firestore + Storage (Admin SDK, server-only writes)
+- **AI**: Claude → OpenAI → Gemini fallback
+- **Auth**: signed member token (`lib/memberAuth.ts`); OTP at launch
 - **Charts**: Recharts
 
 ## 26 Provinces de la RDC
