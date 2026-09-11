@@ -1,21 +1,35 @@
-# Frontend
-frontend/node_modules/
-frontend/.next/
-frontend/package-lock.json
-frontend/.env.local
-frontend/.env
-
-# Backend
-backend/__pycache__/
-backend/*.pyc
-backend/.env
-
-# Root
+# Dependencies
 node_modules/
-.env
-.env.local
+frontend/node_modules/
+
+# Build output
+.next/
+frontend/.next/
 dist/
 build/
 *.egg-info/
 next-env.d.ts
-.next/
+frontend/tsconfig.tsbuildinfo
+
+# Secrets / local env (NEVER commit real values)
+.env
+.env.local
+.env.*.local
+frontend/.env
+frontend/.env.local
+backend/.env
+
+# Firebase local
+.firebase/
+firebase-debug.log
+*firebase-adminsdk*.json
+
+# Backend
+backend/__pycache__/
+backend/*.pyc
+
+# OS
+.DS_Store
+
+# NOTE: frontend/package-lock.json is intentionally COMMITTED for
+# deterministic, reproducible builds on Firebase App Hosting / CI.

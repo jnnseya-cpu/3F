@@ -8,11 +8,13 @@ import { calculateCandidateScore } from '@/lib/scoring';
 import type { Member } from '@/lib/types';
 import AIAgentPanel from '@/components/AIAgentPanel';
 
+// Illustrative example profiles (NOT real people) — demonstrate how the merit
+// score is computed. Real candidate data appears once Firebase is connected.
 const DEMO_CANDIDATES: Member[] = [
   {
-    id: 'm001', firstName: 'Jean-Baptiste', lastName: 'Mutombo',
+    id: 'm001', firstName: 'Profil', lastName: 'exemple A',
     dateOfBirth: '1980-03-15', gender: 'M', nationality: 'Congolaise',
-    phone: '+243812345678', email: 'jb@example.com',
+    phone: '', email: '',
     location: { country: 'RD Congo', continent: 'Afrique', province: 'Haut-Katanga' },
     education: { level: 'Master', score: 88, field: 'Administration publique', institution: 'UNIKIN' },
     work: { currentEmployer: 'Gouvernement Provincial', jobTitle: 'Directeur adjoint', sector: 'Public', yearsExperience: 12, score: 91 },
@@ -22,9 +24,9 @@ const DEMO_CANDIDATES: Member[] = [
     localCredibilityScore: 82, leadershipScore: 79,
   },
   {
-    id: 'm002', firstName: 'Marie-Claire', lastName: 'Kalonga',
+    id: 'm002', firstName: 'Profil', lastName: 'exemple B',
     dateOfBirth: '1978-07-22', gender: 'F', nationality: 'Congolaise',
-    phone: '+243897654321', email: 'mc@example.com',
+    phone: '', email: '',
     location: { country: 'RD Congo', continent: 'Afrique', province: 'Nord-Kivu' },
     education: { level: 'Bachelor', score: 75, field: 'Économie', institution: 'UCB' },
     work: { currentEmployer: 'ONG Développement', jobTitle: 'Directrice', sector: 'ONG', yearsExperience: 15, score: 85 },
@@ -34,9 +36,9 @@ const DEMO_CANDIDATES: Member[] = [
     localCredibilityScore: 88, leadershipScore: 85,
   },
   {
-    id: 'm003', firstName: 'Patrick', lastName: 'Mbeki',
+    id: 'm003', firstName: 'Profil', lastName: 'exemple C',
     dateOfBirth: '1985-11-08', gender: 'M', nationality: 'Congolaise',
-    phone: '+243856789012', email: 'pm@example.com',
+    phone: '', email: '',
     location: { country: 'RD Congo', continent: 'Afrique', province: 'Kinshasa' },
     education: { level: 'Master', score: 92, field: 'Droit public', institution: 'UNIKIN' },
     work: { currentEmployer: 'Cabinet juridique', jobTitle: 'Avocat senior', sector: 'Juridique', yearsExperience: 10, score: 88 },

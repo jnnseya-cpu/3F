@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import PageViewTracker from '@/components/PageViewTracker';
+import InstallPrompt from '@/components/InstallPrompt';
 import type { Language } from '@/lib/translations';
 import { LanguageContext } from '@/lib/i18n';
 import { LAUNCH_LABEL_FR } from '@/lib/launch';
@@ -26,6 +27,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <LanguageContext.Provider value={{ lang: language, setLang }}>
       <PageViewTracker />
+      <InstallPrompt />
       <Navbar language={language} setLanguage={setLang} />
       <main>{children}</main>
       <footer className="text-white mt-20 relative overflow-hidden"

@@ -1,0 +1,31 @@
+rules_version = '2';
+
+// ============================================================================
+// Le Congo D'Abord — Cloud Storage security rules.
+//
+// Same principle as firestore.rules: the server writes via the Firebase Admin
+// SDK (service account), which BYPASSES these rules. Clients get NO write
+// access to sensitive areas. Public, non-sensitive assets are world-readable.
+// ============================================================================
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Public brand/media assets uploaded by the server (logos, article images).
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if false; // server-only via Admin SDK
+    }
+
+    // Member documents / uploads — server-only. No direct client access:
+    // uploads must go through a server route that validates + writes via Admin.
+    match /members/{memberId}/{allPaths=**} {
+      allow read, write: if false;
+    }
+
+    // Default deny for everything not explicitly allowed above.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

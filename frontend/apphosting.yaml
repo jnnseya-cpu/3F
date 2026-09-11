@@ -1,0 +1,83 @@
+# Firebase App Hosting — runtime & build configuration for the Next.js app.
+# App root: this "frontend/" directory. In the Firebase console, set the
+# App Hosting backend's Root directory to "/frontend".
+# Docs: https://firebase.google.com/docs/app-hosting/configure
+
+runConfig:
+  minInstances: 0        # scale to zero when idle (cost control pre-launch)
+  maxInstances: 10       # raise for launch-day traffic
+  concurrency: 80        # requests per instance
+  cpu: 1
+  memoryMiB: 512
+
+# Environment variables.
+#  - Public (NEXT_PUBLIC_*) are safe as plain values, available at BUILD so
+#    they are inlined into the client bundle.
+#  - Everything sensitive MUST come from Cloud Secret Manager via `secret:`.
+#    Create each secret first, then grant App Hosting access, e.g.:
+#      firebase apphosting:secrets:set FIREBASE_PRIVATE_KEY
+#      firebase apphosting:secrets:grantaccess FIREBASE_PRIVATE_KEY --backend <id>
+#    Uncomment a secret line only AFTER the secret exists, or the rollout fails.
+env:
+  - variable: NEXT_PUBLIC_APP_NAME
+    value: "Le Congo D'Abord"
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_SITE_URL
+    value: "https://congodabord.cd"
+    availability: [BUILD, RUNTIME]
+
+  # --- Public analytics (optional; set to real IDs when ready) ---
+  # - variable: NEXT_PUBLIC_META_PIXEL_ID
+  #   value: "..."
+  #   availability: [BUILD, RUNTIME]
+  # - variable: NEXT_PUBLIC_GA_ID
+  #   value: "..."
+  #   availability: [BUILD, RUNTIME]
+
+  # --- Firebase Admin (server writer; required for persistence & auth) ---
+  # - variable: FIREBASE_PROJECT_ID
+  #   secret: FIREBASE_PROJECT_ID
+  # - variable: FIREBASE_CLIENT_EMAIL
+  #   secret: FIREBASE_CLIENT_EMAIL
+  # - variable: FIREBASE_PRIVATE_KEY
+  #   secret: FIREBASE_PRIVATE_KEY
+  # - variable: FIREBASE_API_KEY
+  #   secret: FIREBASE_API_KEY
+
+  # --- AI providers (fallback chain) ---
+  # - variable: ANTHROPIC_API_KEY
+  #   secret: ANTHROPIC_API_KEY
+  # - variable: OPENAI_API_KEY
+  #   secret: OPENAI_API_KEY
+  # - variable: GEMINI_API_KEY
+  #   secret: GEMINI_API_KEY
+
+  # --- Payments (mobile-money gateway) ---
+  # - variable: BITRIPAY_API_KEY
+  #   secret: BITRIPAY_API_KEY
+  # - variable: BITRIPAY_API_URL
+  #   secret: BITRIPAY_API_URL
+  # - variable: BITRIPAY_WEBHOOK_SECRET
+  #   secret: BITRIPAY_WEBHOOK_SECRET
+
+  # --- Security / sessions ---
+  # - variable: MEMBER_TOKEN_SECRET
+  #   secret: MEMBER_TOKEN_SECRET
+  # - variable: HUMAN_GATE_SECRET
+  #   secret: HUMAN_GATE_SECRET
+  # - variable: SENTINEL_ADMIN_KEY
+  #   secret: SENTINEL_ADMIN_KEY
+  # - variable: CRON_SECRET
+  #   secret: CRON_SECRET
+  # - variable: JWT_SECRET
+  #   secret: JWT_SECRET
+  # - variable: ENCRYPTION_KEY
+  #   secret: ENCRYPTION_KEY
+
+  # --- Email (newsletter) ---
+  # - variable: RESEND_API_KEY
+  #   secret: RESEND_API_KEY
+  # - variable: NEWSLETTER_FROM
+  #   secret: NEWSLETTER_FROM
+  # - variable: NEWSLETTER_SECRET
+  #   secret: NEWSLETTER_SECRET

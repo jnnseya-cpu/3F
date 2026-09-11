@@ -2,11 +2,13 @@
 
 import { Member, AIRecommendation, Contribution, TrainingModule, EthicsCase, InfrastructureNeed, PolicyProposal, DashboardStats } from './types';
 
+// NOTE: illustrative example data only (NOT real people). Shown behind
+// <DemoDataBanner/>. Real records replace this once Firebase is connected.
 export const MOCK_MEMBERS: Member[] = [
   {
     id: 'm-001',
-    firstName: 'Marie-Claire',
-    lastName: 'Kabila',
+    firstName: 'Profil',
+    lastName: 'exemple A',
     dateOfBirth: '1985-03-15',
     gender: 'F',
     nationality: 'Congolaise',
@@ -49,8 +51,8 @@ export const MOCK_MEMBERS: Member[] = [
   },
   {
     id: 'm-002',
-    firstName: 'Jean-Baptiste',
-    lastName: 'Mutombo',
+    firstName: 'Profil',
+    lastName: 'exemple B',
     dateOfBirth: '1978-07-22',
     gender: 'M',
     nationality: 'Congolais',
@@ -71,7 +73,7 @@ export const MOCK_MEMBERS: Member[] = [
       score: 72,
     },
     work: {
-      currentEmployer: 'Cabinet Juridique Mutombo & Associés',
+      currentEmployer: 'Cabinet juridique (exemple)',
       jobTitle: 'Avocat Senior',
       sector: 'Juridique',
       yearsExperience: 20,
@@ -93,8 +95,8 @@ export const MOCK_MEMBERS: Member[] = [
   },
   {
     id: 'm-003',
-    firstName: 'Espérance',
-    lastName: 'Lukeba',
+    firstName: 'Profil',
+    lastName: 'exemple C',
     dateOfBirth: '1991-11-05',
     gender: 'F',
     nationality: 'Congolaise',
@@ -137,8 +139,8 @@ export const MOCK_MEMBERS: Member[] = [
   },
   {
     id: 'm-004',
-    firstName: 'Patrick',
-    lastName: 'Ilunga',
+    firstName: 'Profil',
+    lastName: 'exemple D',
     dateOfBirth: '1982-04-18',
     gender: 'M',
     nationality: 'Congolais',
@@ -182,8 +184,8 @@ export const MOCK_MEMBERS: Member[] = [
   },
   {
     id: 'm-005',
-    firstName: 'Yvonne',
-    lastName: 'Mwamba',
+    firstName: 'Profil',
+    lastName: 'exemple E',
     dateOfBirth: '1995-08-30',
     gender: 'F',
     nationality: 'Congolaise',

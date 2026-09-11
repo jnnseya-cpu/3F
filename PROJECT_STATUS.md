@@ -13,7 +13,10 @@ homepage hero (`components/LaunchCountdown.tsx`).
 ## Repo & structure
 - GitHub: `jnnseya-cpu/3F`, branch `claude/gracious-allen-WiiR5`
 - Monorepo: `frontend/` (Next.js 14, the live app) · `backend/` (FastAPI, 23 agents) · `shared/` · `database/`
-- The **frontend** is the deployable product (Vercel, root dir = `frontend`).
+- The **frontend** is the deployable product. **Deploy target: Firebase App Hosting**
+  (root dir = `frontend`; config in `frontend/apphosting.yaml`, `firebase.json`,
+  `.firebaserc`, `storage.rules`). See `DEPLOYMENT.md` for the full readiness report
+  and the exact deploy steps. `package-lock.json` is committed for deterministic builds.
 
 ## STATUS LEGEND
 - ✅ BUILT & TESTED — done, do not rebuild
