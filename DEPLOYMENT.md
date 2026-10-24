@@ -1,5 +1,27 @@
 # Production Readiness & Deployment — Le Congo D'Abord
 
+## Dependency security audit — 2026-10-24
+Ran `npm audit` after a container rebuild (newer toolchain). Actions taken:
+- **Next.js 14.2.3 → 14.2.35** (latest patched 14.2.x) — backports the critical
+  CVEs (middleware auth-bypass, SSRF, cache-poisoning). We deliberately did **not**
+  force `next@16` (a two-major jump the audit suggests): we use **no middleware, no
+  `next/image`, no Server Actions**, so those CVE surfaces don't apply, and a
+  double-major upgrade is a larger regression risk than the residual flag.
+- **firebase-admin 12 → 14.5.0** — clears the `node-forge` high; API-compatible
+  (modular imports unchanged), Node 22 satisfies it.
+- **postcss → 8.5.26**, **@grpc/grpc-js → 1.14.6** (via `npm audit fix`) — cleared.
+- **Removed** `images.remotePatterns: '**'` (unused — we have zero `next/image`)
+  → closes the Image-Optimizer SSRF/DoS surface; set `images.unoptimized: true`.
+- Removed the stale `NEXT_PUBLIC_API_URL` default (pointed at the deleted backend).
+
+**Residual audit flags (documented, non-exploitable here):** `next` (critical by
+version-range only — exploitable surfaces unused, 14.2.x backports applied),
+`glob` (dev-only eslint tooling; CLI command-injection, we never run the glob CLI),
+`postcss@8.4.31` (bundled inside Next's **build** tooling, not runtime-served).
+Clearing these in npm's view requires `next@16` — tracked as a **planned, tested
+migration**, not an emergency. Build-time/dev advisories do not reach the served app.
+
+
 Honest status against the 7-part hardening request. **Deploy target: Firebase
 App Hosting** (Next.js SSR). Verified: `tsc` clean, `next build` green, `next
 lint` 0 errors, 14 key routes return 200 in the production build, APIs degrade

@@ -39,16 +39,10 @@ const nextConfig = {
   // firebase-admin uses Node built-ins/native deps — keep it out of the
   // bundle so it runs correctly in the serverless function.
   experimental: { serverComponentsExternalPackages: ['firebase-admin'] },
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-    ],
-  },
+  // No next/image usage in the app — disable the Image Optimization remote
+  // fetcher entirely (removes the SSRF/DoS surface flagged for 14.x).
+  images: { unoptimized: true },
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
     NEXT_PUBLIC_APP_NAME: "Le Congo D'Abord",
   },
   async headers() {
