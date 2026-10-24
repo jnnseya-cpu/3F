@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
   const guard = humanGuard(req, body);
   if (guard) return guard;
 
-  const identifier = (body.identifier || '').trim();
+  const identifier = (typeof body.identifier === 'string' ? body.identifier : '').trim();
   const isEmail = EMAIL_RE.test(identifier);
   const isPhone = PHONE_RE.test(identifier);
   if (!isEmail && !isPhone) {

@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
   }
 
   let slug = '';
-  try { slug = (await req.json())?.slug || ''; } catch { /* bad body */ }
+  try { const b = await req.json(); slug = typeof b?.slug === 'string' ? b.slug : ''; } catch { /* bad body */ }
   if (!SLUG_RE.test(slug)) return NextResponse.json({ error: 'slug invalide' }, { status: 400 });
   if (!configured()) return NextResponse.json({ slug, count: null, ledger: false });
 

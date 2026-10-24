@@ -54,7 +54,9 @@ export async function POST(req: NextRequest) {
     const guard = humanGuard(req, body);
     if (guard) return guard;
 
-    if (!body.firstName?.trim() || !body.lastName?.trim()) {
+    // Type-guard against non-string inputs (a numeric firstName would crash .trim()).
+    if (typeof body.firstName !== 'string' || typeof body.lastName !== 'string' ||
+        !body.firstName.trim() || !body.lastName.trim()) {
       return NextResponse.json({ error: 'Nom et prénom requis' }, { status: 400 });
     }
 
