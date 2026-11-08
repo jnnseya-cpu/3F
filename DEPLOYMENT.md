@@ -1,5 +1,18 @@
 # Production Readiness & Deployment — Le Congo D'Abord
 
+## 🔒 Stabilisation lock — 2026-11-08
+State frozen so nothing silently changes or drops:
+- **Every direct dependency pinned EXACT** (no `^`) in `package.json`, matching the
+  committed `package-lock.json`. `npm install` and `npm ci` now produce identical trees.
+- **Reproducible build contract:** use `npm ci` (installs the exact lockfile). Verified
+  green from a clean `npm ci`: `tsc` clean, `next build` compiled, 0 lint errors, all 22
+  routes 200, 42 blog articles present.
+- **Node pinned** `>=22.23.4 <23` (patched, EOL-20 excluded).
+- Working tree clean and fully pushed at lock time. Tag: `lock-2026-11-08`.
+- To change a dependency later, do it **deliberately** (edit the exact version + `npm install`),
+  never via an unpinned range.
+
+
 ## Dependency security audit — 2026-10-24
 Ran `npm audit` after a container rebuild (newer toolchain). Actions taken:
 - **Next.js 14.2.3 → 14.2.35** (latest patched 14.2.x) — backports the critical
