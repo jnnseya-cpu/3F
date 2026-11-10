@@ -34,7 +34,6 @@ export default function Navbar({ language, setLanguage }: NavbarProps) {
     { href: '/blog', label: 'Blog' },
     { href: '/province', label: 'Provinces' },
     { href: '/growth', label: 'Growth IA' },
-    { href: '/trend', label: 'Trend IA' },
     { href: '/invite', label: 'Inviter' },
     { href: '/security', label: 'Sentinel' },
   ];

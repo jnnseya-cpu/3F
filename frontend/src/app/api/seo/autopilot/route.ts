@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { debit, refund, ACU_COSTS } from '@/lib/acu';
 import { briefedTopic } from '@/lib/trend/sdk';
+import { runTrendCycle } from '@/lib/trend/cycle';
 
 /**
  * SEO Autopilot — runs on a daily Vercel cron (see vercel.json "crons").
@@ -135,8 +136,8 @@ export async function GET(req: NextRequest) {
 
   // Rotate topic by day of year so each run gets a different subject
   const dayOfYear = Math.floor((Date.now() - Date.UTC(new Date().getUTCFullYear(), 0, 0)) / 86_400_000);
-  // Trend layer: if an approved Growth Brief names a priority topic, write about
-  // it instead of the rotation (the control layer steering the SEO agent).
+  // Trend layer runs invisibly here: refresh signals + brief before choosing a topic.
+  try { await runTrendCycle(); } catch { /* never block the autopilot */ }
   const priority = await briefedTopic();
   const topic = priority ? `Approfondir le sujet prioritaire : ${priority}` : TOPICS[dayOfYear % TOPICS.length];
 

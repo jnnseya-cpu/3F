@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
+import { isAdmin } from '@/lib/trend/admin';
 import { createBrief, approveBrief, listBriefs } from '@/lib/trend/store';
 
 export const dynamic = 'force-dynamic';
 
 /** GET → list briefs. */
 export async function GET(req: NextRequest) {
+  if (!isAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   if (!rateLimit(`trend-brief-r:${clientIp(req.headers)}`, 60, 60_000)) {
     return NextResponse.json({ error: 'Trop de requêtes' }, { status: 429 });
   }
@@ -14,6 +16,7 @@ export async function GET(req: NextRequest) {
 
 /** POST { op:'create', topic_id, market } | { op:'approve', id } — draft-only pilot. */
 export async function POST(req: NextRequest) {
+  if (!isAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   if (!rateLimit(`trend-brief-w:${clientIp(req.headers)}`, 30, 60_000)) {
     return NextResponse.json({ error: 'Trop de requêtes' }, { status: 429 });
   }

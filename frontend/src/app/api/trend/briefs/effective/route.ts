@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
+import { isAdmin } from '@/lib/trend/admin';
 import { effectiveBrief } from '@/lib/trend/store';
 
 export const dynamic = 'force-dynamic';
@@ -10,6 +11,7 @@ export const dynamic = 'force-dynamic';
  * the host's agents fall back to baseline behaviour on 204.
  */
 export async function GET(req: NextRequest) {
+  if (!isAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   if (!rateLimit(`trend-eff:${clientIp(req.headers)}`, 120, 60_000)) {
     return NextResponse.json({ error: 'Trop de requêtes' }, { status: 429 });
   }

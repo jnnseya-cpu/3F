@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
+import { isAdmin } from '@/lib/trend/admin';
 import { ingest, setObservations, observationCount, type Observation } from '@/lib/trend/store';
 import { collectPlatformObservations } from '@/lib/trend/signals';
 
@@ -12,6 +13,7 @@ const EXAMPLE: Observation[] = [
 ];
 
 export async function POST(req: NextRequest) {
+  if (!isAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   if (!rateLimit(`trend-obs:${clientIp(req.headers)}`, 30, 60_000)) {
     return NextResponse.json({ error: 'Trop de requêtes' }, { status: 429 });
   }
