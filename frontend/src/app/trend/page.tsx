@@ -35,11 +35,18 @@ export default function TrendConsole() {
 
   useEffect(() => { refresh(); }, [refresh]);
 
+  const analyzePlatform = async () => {
+    setBusy(true); setMsg(null);
+    const r = await fetch('/api/trend/observations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source: 'platform' }) });
+    const d = await r.json();
+    setMsg(d.total > 0 ? `${d.total} signaux réels de la plateforme analysés (vues d'articles en direct).` : (d.note || 'Aucun signal réel disponible.'));
+    await refresh(); setBusy(false);
+  };
   const seed = async () => {
     setBusy(true); setMsg(null);
     const r = await fetch('/api/trend/observations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ seed: true }) });
     const d = await r.json();
-    setMsg(`Signaux ingérés : ${d.accepted} acceptés, ${d.duplicate} doublons. Total ${d.total}.`);
+    setMsg(`Signaux d'exemple ingérés : ${d.accepted} acceptés, ${d.duplicate} doublons. Total ${d.total}.`);
     await refresh(); setBusy(false);
   };
   const create = async (o: Opp) => {
@@ -72,10 +79,13 @@ export default function TrendConsole() {
 
       <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
         <div className="flex flex-wrap items-center gap-3">
-          <button onClick={seed} disabled={busy} className="btn-primary flex items-center gap-2 disabled:opacity-60">
-            <Sparkles className="w-4 h-4" /> Charger des signaux d&apos;exemple
+          <button onClick={analyzePlatform} disabled={busy} className="btn-primary flex items-center gap-2 disabled:opacity-60">
+            <Radar className="w-4 h-4" /> Analyser les signaux de la plateforme
           </button>
-          <button onClick={refresh} disabled={busy} className="text-sm font-semibold text-drc-blue border border-blue-200 bg-blue-50 px-4 py-2.5 rounded-xl hover:bg-drc-blue hover:text-white transition-colors flex items-center gap-2">
+          <button onClick={seed} disabled={busy} className="text-sm font-semibold text-drc-blue border border-blue-200 bg-blue-50 px-4 py-2.5 rounded-xl hover:bg-drc-blue hover:text-white transition-colors flex items-center gap-2">
+            <Sparkles className="w-4 h-4" /> Signaux d&apos;exemple
+          </button>
+          <button onClick={refresh} disabled={busy} className="text-sm font-semibold text-gray-600 border border-gray-200 bg-white px-4 py-2.5 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2">
             <RefreshCw className="w-4 h-4" /> Rafraîchir
           </button>
           {msg && <span className="text-sm text-gray-600 bg-white border border-black/5 rounded-lg px-3 py-2">{msg}</span>}

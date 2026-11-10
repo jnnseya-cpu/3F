@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
   if (!/^[A-Z]{2}$/.test(market)) {
     return NextResponse.json({ error: 'market (ISO alpha-2) requis' }, { status: 422 });
   }
-  const brief = effectiveBrief(market, topic);
+  const brief = await effectiveBrief(market, topic);
   if (!brief) return new NextResponse(null, { status: 204 }); // no eligible match → baseline
   return NextResponse.json({ brief });
 }

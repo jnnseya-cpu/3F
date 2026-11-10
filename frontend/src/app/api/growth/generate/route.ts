@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
 import { humanGuard } from '@/lib/guard';
 import { debit, refund, ACU_COSTS } from '@/lib/acu';
+import { activeBriefGuidance } from '@/lib/trend/sdk';
 import { verifyMemberToken } from '@/lib/memberAuth';
 
 /**
@@ -27,7 +28,8 @@ const SYSTEM = `Tu es l'AI Growth Engine du parti politique "Le Congo D'Abord" (
 Contexte : premier parti congolais propulsé par l'IA, fondé par Mr Justin Nseya. Cotisation 1 USD/mois (12 USD/an recommandé). Site : congodabord.cd. Slogan : "La compétence avant les promesses". Couleurs : bleu #007FFF, jaune #FCD116, rouge #CE1126.
 Règles : réponds en français (sauf si une autre langue est demandée), sois concret et directement utilisable, n'invente JAMAIS de statistiques sur le parti (pas de nombres de membres).`;
 
-async function generate(prompt: string): Promise<{ text: string; provider: string } | null> {
+async function generate(prompt: string, systemSuffix = ''): Promise<{ text: string; provider: string } | null> {
+  const sys = SYSTEM + systemSuffix;
   const providers: Array<[string, () => Promise<string | null>]> = [
     ['claude', async () => {
       const key = process.env.ANTHROPIC_API_KEY;
@@ -35,7 +37,7 @@ async function generate(prompt: string): Promise<{ text: string; provider: strin
       const r = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-        body: JSON.stringify({ model: process.env.CLAUDE_MODEL || 'claude-sonnet-4-6', max_tokens: 1500, system: SYSTEM, messages: [{ role: 'user', content: prompt }] }),
+        body: JSON.stringify({ model: process.env.CLAUDE_MODEL || 'claude-sonnet-4-6', max_tokens: 1500, system: sys, messages: [{ role: 'user', content: prompt }] }),
       });
       if (!r.ok) throw new Error(`claude ${r.status}`);
       return (await r.json()).content?.[0]?.text || null;
@@ -46,7 +48,7 @@ async function generate(prompt: string): Promise<{ text: string; provider: strin
       const r = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-        body: JSON.stringify({ model: process.env.OPENAI_MODEL || 'gpt-4o-mini', max_tokens: 1500, messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: prompt }] }),
+        body: JSON.stringify({ model: process.env.OPENAI_MODEL || 'gpt-4o-mini', max_tokens: 1500, messages: [{ role: 'system', content: sys }, { role: 'user', content: prompt }] }),
       });
       if (!r.ok) throw new Error(`openai ${r.status}`);
       return (await r.json()).choices?.[0]?.message?.content || null;
@@ -58,7 +60,7 @@ async function generate(prompt: string): Promise<{ text: string; provider: strin
       const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ systemInstruction: { parts: [{ text: SYSTEM }] }, contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { maxOutputTokens: 1500 } }),
+        body: JSON.stringify({ systemInstruction: { parts: [{ text: sys }] }, contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { maxOutputTokens: 1500 } }),
       });
       if (!r.ok) throw new Error(`gemini ${r.status}`);
       return (await r.json()).candidates?.[0]?.content?.parts?.[0]?.text || null;
@@ -119,7 +121,7 @@ export async function POST(req: NextRequest) {
       if (typeof v === 'string' && v.length <= 2000) clean[k] = v;
     }
 
-    const result = await generate(promptBuilder(clean));
+    const result = await generate(promptBuilder(clean), await activeBriefGuidance());
     if (!result) {
       await refund(memberId, ACU_COSTS.growth);
       return NextResponse.json({ error: 'AI indisponible' }, { status: 503 });

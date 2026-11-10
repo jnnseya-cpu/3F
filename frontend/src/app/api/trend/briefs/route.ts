@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   if (!rateLimit(`trend-brief-r:${clientIp(req.headers)}`, 60, 60_000)) {
     return NextResponse.json({ error: 'Trop de requêtes' }, { status: 429 });
   }
-  return NextResponse.json({ briefs: listBriefs() });
+  return NextResponse.json({ briefs: await listBriefs() });
 }
 
 /** POST { op:'create', topic_id, market } | { op:'approve', id } — draft-only pilot. */
@@ -24,13 +24,13 @@ export async function POST(req: NextRequest) {
     if (typeof body.topic_id !== 'string' || typeof body.market !== 'string') {
       return NextResponse.json({ error: 'topic_id et market requis' }, { status: 422 });
     }
-    const r = createBrief(body.topic_id, body.market);
+    const r = await createBrief(body.topic_id, body.market);
     if ('error' in r) return NextResponse.json(r, { status: 409 });
     return NextResponse.json({ brief: r }, { status: 201 });
   }
   if (body.op === 'approve') {
     if (typeof body.id !== 'string') return NextResponse.json({ error: 'id requis' }, { status: 422 });
-    const r = approveBrief(body.id);
+    const r = await approveBrief(body.id);
     if ('error' in r) return NextResponse.json(r, { status: 404 });
     return NextResponse.json({ brief: r });
   }

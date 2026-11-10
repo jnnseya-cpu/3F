@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
 import { humanGuard } from '@/lib/guard';
 import { debit, refund, ACU_COSTS } from '@/lib/acu';
+import { activeBriefGuidance } from '@/lib/trend/sdk';
 import { verifyMemberToken } from '@/lib/memberAuth';
 
 /**
@@ -132,7 +133,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const system = SYSTEM_PROMPT(agentName || 'Agent CDP');
+    const system = SYSTEM_PROMPT(agentName || 'Agent CDP') + (await activeBriefGuidance());
     const providers: Array<[string, (s: string, m: string) => Promise<string | null>]> = [
       ['claude', tryClaude],
       ['openai', tryOpenAI],
